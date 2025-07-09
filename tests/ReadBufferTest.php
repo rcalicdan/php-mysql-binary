@@ -1,390 +1,196 @@
 <?php
-/**
- * Copyright © EcomDev B.V. All rights reserved.
- * See LICENSE for license details.
- */
 
 declare(strict_types=1);
 
-namespace Rcalicdan\MySQLBinaryProtocol;
+use Rcalicdan\MySQLBinaryProtocol\ReadBuffer;
+use Rcalicdan\MySQLBinaryProtocol\IncompleteBufferException;
 
+beforeEach(function () {
+    $this->readBuffer = new ReadBuffer();
+});
 
-use PHPUnit\Framework\TestCase;
+test('reads buffer by length', function () {
+    $this->readBuffer->append('Some string');
 
-class ReadBufferTest extends TestCase
-{
-    /** @var ReadBuffer */
-    private $readBuffer;
+    expect($this->readBuffer->read(4))->toBe('Some');
+});
 
-    protected function setUp(): void
-    {
-        $this->readBuffer = new ReadBuffer();
-    }
+test('reads buffer by moving position forward', function () {
+    $this->readBuffer->append('TDD is awesome');
 
+    $this->readBuffer->read(3);
 
-    /** @test */
-    /**
+    expect($this->readBuffer->read(11))->toBe(' is awesome');
+});
 
-     * @test
+test('throws incomplete buffer exception when buffer is smaller than read size', function () {
+    $this->readBuffer->append('TDD is');
 
-     */
+    $this->readBuffer->read(11);
+})->throws(IncompleteBufferException::class);
 
-    public function testReadsBufferByLength()
-    {
-        $this->readBuffer->append('Some string');
+test('throws incomplete buffer exception when not enough data is left to read', function () {
+    $this->readBuffer->append('TDD is great');
 
-        $this->assertEquals('Some', $this->readBuffer->read(4));
-    }
-    
-    /** @test */
-    /**
+    $this->readBuffer->read(7);
 
-     * @test
+    $this->readBuffer->read(7);
+})->throws(IncompleteBufferException::class);
 
-     */
+test('allows to read all added pieces to buffer', function () {
+    $this->readBuffer->append('TDD is');
 
-    public function testReadsBufferByMovingPositionForward()
-    {
-        $this->readBuffer->append('TDD is awesome');
+    $this->readBuffer->read(4);
 
-        $this->readBuffer->read(3);
+    $this->readBuffer->append(' great');
 
-        $this->assertEquals(' is awesome', $this->readBuffer->read(11));
-    }
+    expect($this->readBuffer->read(8))->toBe('is great');
+});
 
-    /** @test */
-    /**
+test('is readable when asked bytes are below buffer length', function () {
+    $this->readBuffer->append('Some data');
 
-     * @test
+    expect($this->readBuffer->isReadable(4))->toBeTrue();
+});
 
-     */
+test('is not readable when bytes are longer than buffer length', function () {
+    $this->readBuffer->append('Some');
 
-    public function testThrowsIncompleteBufferExceptionWhenNotBufferIsSmallerThenReadSize()
-    {
-        $this->readBuffer->append('TDD is');
+    expect($this->readBuffer->isReadable(5))->toBeFalse();
+});
 
-        $this->expectException(IncompleteBufferException::class);
+test('is not readable when asked length is lower than remaining bytes to read', function () {
+    $this->readBuffer->append('Some data');
+    $this->readBuffer->read(5);
 
-        $this->readBuffer->read(11);
-    }
-    
-    /** @test */
-    /**
+    expect($this->readBuffer->isReadable(5))->toBeFalse();
+});
 
-     * @test
+test('is readable when exact amount of bytes available to read', function () {
+    $this->readBuffer->append('Data in buffer');
 
-     */
+    $this->readBuffer->read(7);
 
-    public function testThrowIncompleteBufferExceptionWhenNotEnoughDataIsLeftToRead()
-    {
-        $this->readBuffer->append('TDD is great');
+    expect($this->readBuffer->isReadable(7))->toBeTrue();
+});
 
+test('allows to read data again if previous session was not read completely', function () {
+    $this->readBuffer->append('Data in buffer');
+    $this->readBuffer->read(4);
+    $this->readBuffer->read(4);
+
+    try {
         $this->readBuffer->read(7);
-
-        $this->expectException(IncompleteBufferException::class);
-
-        $this->readBuffer->read(7);
-    }
-    
-    /** @test */
-    /**
-
-     * @test
-
-     */
-
-    public function testAllowsToReadAllAddedPiecesToBuffer()
-    {
-        $this->readBuffer->append('TDD is');
-
-        $this->readBuffer->read(4);
-
-        $this->readBuffer->append(' great');
-
-        $this->assertEquals('is great', $this->readBuffer->read(8));
+    } catch (IncompleteBufferException $exception) {
     }
 
-    /** @test */
-    /**
+    expect($this->readBuffer->read(8))->toBe('Data in ');
+});
 
-     * @test
+test('allows to move read buffer pointer after read', function () {
+    $this->readBuffer->append('Data in buffer');
 
-     */
+    $this->readBuffer->read(5);
+    $this->readBuffer->flush();
 
-    public function testIsReadableWhenAskedBytesAreBelowBufferLength()
-    {
-        $this->readBuffer->append('Some data');
-
-        $this->assertEquals(true, $this->readBuffer->isReadable(4));
-    }
-
-    /** @test */
-    /**
-
-     * @test
-
-     */
-
-    public function testIsNotReadableWhenBytesAreLongerThenBufferLength()
-    {
-        $this->readBuffer->append('Some');
-
-        $this->assertEquals(false, $this->readBuffer->isReadable(5));
-    }
-    
-    /** @test */
-    /**
-
-     * @test
-
-     */
-
-    public function testIsNotReadableWhenAskedLengthIsLowerThenRemainingBytesToRead()
-    {
-        $this->readBuffer->append('Some data');
-        $this->readBuffer->read(5);
-
-        $this->assertEquals(false, $this->readBuffer->isReadable(5));
-    }
-
-    /** @test */
-    /**
-
-     * @test
-
-     */
-
-    public function testIsReadableWhenExactAmountOfBytesAvailableToRead()
-    {
-        $this->readBuffer->append('Data in buffer');
-
-        $this->readBuffer->read(7);
-
-        $this->assertEquals(true, $this->readBuffer->isReadable(7));
-    }
-
-    /** @test */
-    /**
-
-     * @test
-
-     */
-
-    public function testAllowsToReadDataAgainIfPreviousSessionWasNotReadCompletely()
-    {
-        $this->readBuffer->append('Data in buffer');
-        $this->readBuffer->read(4);
-        $this->readBuffer->read(4);
-
-        try {
-            $this->readBuffer->read(7);
-        } catch (IncompleteBufferException $exception) { }
-
-        $this->assertEquals('Data in ', $this->readBuffer->read(8));
-    }
-
-    /** @test */
-    /**
-
-     * @test
-
-     */
-
-    public function testAllowsToMoveReadBufferPointerAfterRead()
-    {
-        $this->readBuffer->append('Data in buffer');
-
-        $this->readBuffer->read(5);
-        $this->readBuffer->flush();
-
-        try {
-            $this->readBuffer->read(10);
-        } catch (IncompleteBufferException $e) {
-
-        }
-
-        $this->assertEquals('in buffer', $this->readBuffer->read(9));
-    }
-    
-    /** @test */
-    /**
-
-     * @test
-
-     */
-
-    public function testClearsBufferWhenReadLimitIsReached()
-    {
-        $limitedReadBuffer = new ReadBuffer(20);
-
-        $limitedReadBuffer->append('Some data to read 2 remainder of buffer');
-        $limitedReadBuffer->read(10);
-        $limitedReadBuffer->read(10);
-        $limitedReadBuffer->flush();
-
-        $expectedReadBuffer = new ReadBuffer(20);
-        $expectedReadBuffer->append('remainder of buffer');
-
-        $this->assertEquals($expectedReadBuffer, $limitedReadBuffer);
-    }
-
-    /** @test */
-    /**
-
-     * @test
-
-     */
-
-    public function testClearsBufferLimitIsReachedALongTimeAgo()
-    {
-        $limitedReadBuffer = new ReadBuffer(20);
-
-        $limitedReadBuffer->append('Some data to read 2 very long string to read remainder of buffer');
-        $limitedReadBuffer->read(10);
-        $limitedReadBuffer->flush();
-        $limitedReadBuffer->read(20);
-        $limitedReadBuffer->read(15);
-        $limitedReadBuffer->flush();
-
-        $expectedReadBuffer = new ReadBuffer(20);
-        $expectedReadBuffer->append('remainder of buffer');
-
-        $this->assertEquals($expectedReadBuffer, $limitedReadBuffer);
-    }
-
-    /** @test */
-    /**
-
-     * @test
-
-     */
-
-    public function testFlushReturnsNumberOfReadBytes()
-    {
-        $this->readBuffer->append('Some data');
-        $this->readBuffer->read(4);
-        $this->readBuffer->read(2);
-        $this->assertEquals(6, $this->readBuffer->flush());
-    }
-    
-    /** @test */
-    /**
-
-     * @test
-
-     */
-
-    public function testFlushReturnsZeroWhenNoBytesRead()
-    {
-        $this->readBuffer->append('Some data');
-
-        $this->assertEquals(0, $this->readBuffer->flush());
-    }
-    
-    /** @test */
-    /**
-
-     * @test
-
-     */
-
-    public function testReturnsLengthOfReadInOrderToReadDataUpToThisCharacter()
-    {
-        $this->readBuffer->append('some:data');
-
-        $this->assertEquals(5, $this->readBuffer->scan(':'));
-    }
-    
-    /** @test */
-    /**
-
-     * @test
-
-     */
-
-    public function testReturnsNegativeIndexWhenNoMatchFoundForScan()
-    {
-        $this->readBuffer->append('some data without character');
-
-        $this->assertEquals(-1, $this->readBuffer->scan(':'));
-    }
-
-    /** @test */
-    /**
-
-     * @test
-
-     */
-
-    public function testReturnsLengthOfReadEvenIfCharacterForSearchIsAFirstOneInBuffer()
-    {
-        $this->readBuffer->append(':some other data');
-
-        $this->assertEquals(1, $this->readBuffer->scan(':'));
-    }
-    
-    /** @test */
-    /**
-
-     * @test
-
-     */
-
-    public function testReturnsLengthOfRequiredReadForTheNextCharacterOccurrence()
-    {
-        $this->readBuffer->append('some:other:data');
-        $this->readBuffer->read(5);
-
-        $this->assertEquals(6, $this->readBuffer->scan(':'));
-    }
-
-    /** @test */
-    /**
-
-     * @test
-
-     */
-
-    public function testDefaultReadPositionInBufferIsZero()
-    {
-        $this->assertEquals(0, $this->readBuffer->currentPosition());
-    }
-    
-    /** @test */
-    /**
-
-     * @test
-
-     */
-
-    public function testCurrentPositionIsMovedWithNumberOfReadBytes()
-    {
-        $this->readBuffer->append('Some very long string data');
-
-        $this->readBuffer->read(4);
-        $this->readBuffer->read(6);
-
-        $this->assertEquals(10, $this->readBuffer->currentPosition());
-    }
-    
-    /** @test */
-    /**
-
-     * @test
-
-     */
-
-    public function testCurrentPositionIsRelativeToFlushedReadData()
-    {
-        $this->readBuffer->append('Some very long string data');
-
+    try {
         $this->readBuffer->read(10);
-
-        $this->readBuffer->flush();
-
-        $this->readBuffer->read(3);
-
-        $this->assertEquals(3, $this->readBuffer->currentPosition());
-
+    } catch (IncompleteBufferException $e) {
     }
-}
+
+    expect($this->readBuffer->read(9))->toBe('in buffer');
+});
+
+test('clears buffer when read limit is reached', function () {
+    $limitedReadBuffer = new ReadBuffer(20);
+
+    $limitedReadBuffer->append('Some data to read 2 remainder of buffer');
+    $limitedReadBuffer->read(10);
+    $limitedReadBuffer->read(10);
+    $limitedReadBuffer->flush();
+
+    $expectedReadBuffer = new ReadBuffer(20);
+    $expectedReadBuffer->append('remainder of buffer');
+
+    expect($limitedReadBuffer)->toEqual($expectedReadBuffer);
+});
+
+test('clears buffer limit is reached a long time ago', function () {
+    $limitedReadBuffer = new ReadBuffer(20);
+
+    $limitedReadBuffer->append('Some data to read 2 very long string to read remainder of buffer');
+    $limitedReadBuffer->read(10);
+    $limitedReadBuffer->flush();
+    $limitedReadBuffer->read(20);
+    $limitedReadBuffer->read(15);
+    $limitedReadBuffer->flush();
+
+    $expectedReadBuffer = new ReadBuffer(20);
+    $expectedReadBuffer->append('remainder of buffer');
+
+    expect($limitedReadBuffer)->toEqual($expectedReadBuffer);
+});
+
+test('flush returns number of read bytes', function () {
+    $this->readBuffer->append('Some data');
+    $this->readBuffer->read(4);
+    $this->readBuffer->read(2);
+    
+    expect($this->readBuffer->flush())->toBe(6);
+});
+
+test('flush returns zero when no bytes read', function () {
+    $this->readBuffer->append('Some data');
+
+    expect($this->readBuffer->flush())->toBe(0);
+});
+
+test('returns length of read in order to read data up to this character', function () {
+    $this->readBuffer->append('some:data');
+
+    expect($this->readBuffer->scan(':'))->toBe(5);
+});
+
+test('returns negative index when no match found for scan', function () {
+    $this->readBuffer->append('some data without character');
+
+    expect($this->readBuffer->scan(':'))->toBe(-1);
+});
+
+test('returns length of read even if character for search is a first one in buffer', function () {
+    $this->readBuffer->append(':some other data');
+
+    expect($this->readBuffer->scan(':'))->toBe(1);
+});
+
+test('returns length of required read for the next character occurrence', function () {
+    $this->readBuffer->append('some:other:data');
+    $this->readBuffer->read(5);
+
+    expect($this->readBuffer->scan(':'))->toBe(6);
+});
+
+test('default read position in buffer is zero', function () {
+    expect($this->readBuffer->currentPosition())->toBe(0);
+});
+
+test('current position is moved with number of read bytes', function () {
+    $this->readBuffer->append('Some very long string data');
+
+    $this->readBuffer->read(4);
+    $this->readBuffer->read(6);
+
+    expect($this->readBuffer->currentPosition())->toBe(10);
+});
+
+test('current position is relative to flushed read data', function () {
+    $this->readBuffer->append('Some very long string data');
+
+    $this->readBuffer->read(10);
+
+    $this->readBuffer->flush();
+
+    $this->readBuffer->read(3);
+
+    expect($this->readBuffer->currentPosition())->toBe(3);
+});
