@@ -1,17 +1,14 @@
 <?php
-/**
- * Copyright © EcomDev B.V. All rights reserved.
- * See LICENSE for license details.
- */
 
 declare(strict_types=1);
 
-namespace Rcalicdan\MySQLBinaryProtocol;
+namespace Rcalicdan\MySQLBinaryProtocol\Constants;
 
 /**
- * Collection of capability flags for MySQL communication
- *
- * @see https://dev.mysql.com/doc/internals/en/capability-flags.html#packet-Protocol::CapabilityFlags
+ * MySQL client and server capability flags.
+ * 
+ * These flags define the capabilities supported by the client and server
+ * during the MySQL handshake process and determine available features.
  */
 class CapabilityFlags
 {

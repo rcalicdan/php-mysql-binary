@@ -1,9 +1,8 @@
 <?php
 
-use Rcalicdan\MySQLBinaryProtocol\DefaultPacketReaderFactory;
-use Rcalicdan\MySQLBinaryProtocol\PacketReader;
-use Rcalicdan\MySQLBinaryProtocol\PayloadReader;
-use Rcalicdan\MySQLBinaryProtocol\InvalidBinaryDataException;
+use Rcalicdan\MySQLBinaryProtocol\Exception\InvalidBinaryDataException;
+use Rcalicdan\MySQLBinaryProtocol\Factory\DefaultPacketReaderFactory;
+use Rcalicdan\MySQLBinaryProtocol\Packet\PayloadReader;
 
 beforeEach(function () {
     $this->reader = (new DefaultPacketReaderFactory())->createWithDefaultSettings();

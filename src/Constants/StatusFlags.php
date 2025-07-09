@@ -1,17 +1,14 @@
 <?php
-/**
- * Copyright © EcomDev B.V. All rights reserved.
- * See LICENSE for license details.
- */
 
 declare(strict_types=1);
 
-namespace Rcalicdan\MySQLBinaryProtocol;
+namespace Rcalicdan\MySQLBinaryProtocol\Constants;
 
 /**
- * Collection of server status flags sent in OK packet
- *
- * @see https://dev.mysql.com/doc/internals/en/status-flags.html
+ * MySQL server status flags.
+ * 
+ * These flags indicate the current state of the MySQL server
+ * and are included in various protocol responses.
  */
 class StatusFlags
 {

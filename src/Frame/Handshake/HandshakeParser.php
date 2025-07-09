@@ -1,34 +1,53 @@
 <?php
+
 declare(strict_types=1);
 
-namespace Rcalicdan\MySQLBinaryProtocol;
+namespace Rcalicdan\MySQLBinaryProtocol\Frame\Handshake;
 
-use Rcalicdan\MySQLBinaryProtocol\Frame\HandshakeV10Builder;
+use Rcalicdan\MySQLBinaryProtocol\Constants\CapabilityFlags;
+use Rcalicdan\MySQLBinaryProtocol\Packet\PayloadReader;
 
+/**
+ * Parser for MySQL handshake version 10 frames.
+ * 
+ * This parser extracts handshake information from the binary protocol payload
+ * and constructs a HandshakeV10 frame object using the builder pattern.
+ */
 class HandshakeParser
 {
-    private $frameBuilder;
-    private $frameReceiver;
+    private HandshakeV10Builder $frameBuilder;
+    private mixed $frameReceiver;
 
+    /**
+     * Creates a new handshake parser.
+     *
+     * @param HandshakeV10Builder $frameBuilder The builder for creating frames
+     * @param callable $frameReceiver Callback to receive the parsed frame
+     */
     public function __construct(HandshakeV10Builder $frameBuilder, callable $frameReceiver)
     {
         $this->frameBuilder = $frameBuilder;
         $this->frameReceiver = $frameReceiver;
     }
 
-    public function __invoke(PayloadReader $reader)
+    /**
+     * Parses a handshake frame from the payload reader.
+     *
+     * @param PayloadReader $reader The payload reader containing handshake data
+     */
+    public function __invoke(PayloadReader $reader): void
     {
         $reader->readFixedInteger(1);
+
         $frameBuilder = $this->frameBuilder->withServerInfo(
             $reader->readNullTerminatedString(),
             $reader->readFixedInteger(4)
         );
 
         $authData = $reader->readFixedString(8);
-        $reader->readFixedString(1); // filler
+        $reader->readFixedString(1);
         $capabilities = $reader->readFixedInteger(2);
-
-        $authPlugin = 'mysql_native_password'; // Default for old protocols
+        $authPlugin = 'mysql_native_password';
 
         if ($capabilities & CapabilityFlags::CLIENT_PROTOCOL_41) {
             $frameBuilder = $frameBuilder->withCharset($reader->readFixedInteger(1))
@@ -40,10 +59,10 @@ class HandshakeParser
             if ($capabilities & CapabilityFlags::CLIENT_PLUGIN_AUTH) {
                 $authDataLen = $reader->readFixedInteger(1);
             } else {
-                $reader->readFixedString(1); // Skip 0x00 byte
+                $reader->readFixedString(1);
             }
 
-            $reader->readFixedString(10); // reserved
+            $reader->readFixedString(10);
 
             if ($capabilities & CapabilityFlags::CLIENT_SECURE_CONNECTION) {
                 $authDataPart2Len = max(13, $authDataLen - 8);
@@ -56,9 +75,7 @@ class HandshakeParser
                 $authPlugin = $reader->readNullTerminatedString();
             }
         } else {
-            // Legacy handshake protocol support
             $authData .= $reader->readRestOfPacketString();
-            // Trim trailing NUL byte if present
             if (substr($authData, -1) === "\x00") {
                 $authData = substr($authData, 0, -1);
             }

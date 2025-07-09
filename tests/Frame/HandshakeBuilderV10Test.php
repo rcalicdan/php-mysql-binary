@@ -1,10 +1,10 @@
 <?php
 
-use Rcalicdan\MySQLBinaryProtocol\Frame\HandshakeV10;
-use Rcalicdan\MySQLBinaryProtocol\Frame\HandshakeV10Builder;
-use Rcalicdan\MySQLBinaryProtocol\CapabilityFlags;
-use Rcalicdan\MySQLBinaryProtocol\CharsetIdentifiers;
-use Rcalicdan\MySQLBinaryProtocol\StatusFlags;
+use Rcalicdan\MySQLBinaryProtocol\Constants\CapabilityFlags;
+use Rcalicdan\MySQLBinaryProtocol\Constants\CharsetIdentifiers;
+use Rcalicdan\MySQLBinaryProtocol\Constants\StatusFlags;
+use Rcalicdan\MySQLBinaryProtocol\Frame\Handshake\HandshakeV10;
+use Rcalicdan\MySQLBinaryProtocol\Frame\Handshake\HandshakeV10Builder;
 
 beforeEach(function () {
     $this->builder = new HandshakeV10Builder();

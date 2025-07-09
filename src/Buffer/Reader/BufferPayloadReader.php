@@ -1,15 +1,21 @@
 <?php
 
-/**
- * Copyright © EcomDev B.V. All rights reserved.
- * See LICENSE for license details.
- */
-
 declare(strict_types=1);
 
-namespace Rcalicdan\MySQLBinaryProtocol;
+namespace Rcalicdan\MySQLBinaryProtocol\Buffer\Reader;
 
+use Rcalicdan\MySQLBinaryProtocol\Buffer\ReadBuffer;
+use Rcalicdan\MySQLBinaryProtocol\Exception\IncompleteBufferException;
+use Rcalicdan\MySQLBinaryProtocol\Exception\InvalidBinaryDataException;
+use Rcalicdan\MySQLBinaryProtocol\Packet\PayloadReader;
 
+/**
+ * Reads various data types from a MySQL binary protocol payload buffer.
+ * 
+ * This class implements the PayloadReader interface to provide methods
+ * for reading different MySQL protocol data types including length-encoded
+ * integers and strings, fixed-size data, and null-terminated strings.
+ */
 class BufferPayloadReader implements PayloadReader
 {
     private const LENGTH_MARKERS = [
@@ -20,18 +26,17 @@ class BufferPayloadReader implements PayloadReader
 
     private const NULL_MARKER = 0xfb;
 
-    /** @var ReadBuffer */
-    private $buffer;
+    private ReadBuffer $buffer;
+    private BinaryIntegerReader $integerReader;
+    private array $unreadPacketLength;
 
     /**
-     * @var BinaryIntegerReader
+     * Creates a new buffer payload reader.
+     *
+     * @param ReadBuffer $buffer The buffer to read from
+     * @param array $unreadPacketLength Array of unread packet lengths
+     * @param BinaryIntegerReader $integerReader Integer reader instance
      */
-    private $integerReader;
-
-    /** @var int[] */
-    private $unreadPacketLength;
-
-
     public function __construct(ReadBuffer $buffer, array $unreadPacketLength, BinaryIntegerReader $integerReader)
     {
         $this->buffer = $buffer;
@@ -40,7 +45,10 @@ class BufferPayloadReader implements PayloadReader
     }
 
     /**
-     * {@inheritDoc}
+     * Reads a fixed-size integer from the buffer.
+     *
+     * @param int $bytes Number of bytes to read
+     * @return int|float The integer value
      */
     public function readFixedInteger(int $bytes): int|float
     {
@@ -51,7 +59,10 @@ class BufferPayloadReader implements PayloadReader
     }
 
     /**
-     * {@inheritDoc}
+     * Reads a length-encoded integer or null value.
+     *
+     * @return float|int|null The decoded value or null
+     * @throws InvalidBinaryDataException If the data is malformed
      */
     public function readLengthEncodedIntegerOrNull(): float|int|null
     {
@@ -73,9 +84,10 @@ class BufferPayloadReader implements PayloadReader
     }
 
     /**
-     * Reads string of specified length from buffer
+     * Reads a fixed-length string from the buffer.
      *
-     * @see https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_basic_dt_strings.html
+     * @param int $length Number of bytes to read
+     * @return string The string data
      */
     public function readFixedString(int $length): string
     {
@@ -83,9 +95,9 @@ class BufferPayloadReader implements PayloadReader
     }
 
     /**
-     * Reads string that is has length as the first part of the fragment
+     * Reads a length-encoded string or null value.
      *
-     * @see https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_basic_dt_strings.html
+     * @return string|null The decoded string or null
      */
     public function readLengthEncodedStringOrNull(): ?string
     {
@@ -99,9 +111,10 @@ class BufferPayloadReader implements PayloadReader
     }
 
     /**
-     * Reads string till x00 character
+     * Reads a null-terminated string from the buffer.
      *
-     * @see https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_basic_dt_strings.html
+     * @return string The string data without the null terminator
+     * @throws IncompleteBufferException If no null terminator is found
      */
     public function readNullTerminatedString(): string
     {
@@ -118,9 +131,9 @@ class BufferPayloadReader implements PayloadReader
     }
 
     /**
-     * Reads string that is rest of payload
+     * Reads the remaining data in the current packet.
      *
-     * @see https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_basic_dt_strings.html
+     * @return string The remaining packet data
      */
     public function readRestOfPacketString(): string
     {
@@ -129,11 +142,16 @@ class BufferPayloadReader implements PayloadReader
         );
     }
 
+    /**
+     * Calculates the remaining length to read in the current packet.
+     *
+     * @return int Number of bytes remaining in the current packet
+     */
     private function remainingPacketLengthToRead(): int
     {
         $currentBufferPosition = $this->buffer->currentPosition();
-
         $currentPacketIndex = 0;
+
         while ($this->unreadPacketLength[$currentPacketIndex] <= $currentBufferPosition) {
             $currentBufferPosition -= $this->unreadPacketLength[$currentPacketIndex];
             $currentPacketIndex++;

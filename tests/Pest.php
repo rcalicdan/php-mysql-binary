@@ -1,7 +1,5 @@
 <?php
 
-use Rcalicdan\MySQLBinaryProtocol\BinaryIntegerReader;
-
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -12,6 +10,8 @@ use Rcalicdan\MySQLBinaryProtocol\BinaryIntegerReader;
 | need to change it using the "uses()" function to bind a different classes or traits.
 |
 */
+
+use Rcalicdan\MySQLBinaryProtocol\Buffer\Reader\BinaryIntegerReader;
 
 uses(PHPUnit\Framework\TestCase::class)->in('.');
 

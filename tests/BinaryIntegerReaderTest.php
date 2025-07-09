@@ -1,8 +1,10 @@
 <?php
 
-use Rcalicdan\MySQLBinaryProtocol\BinaryIntegerReader;
 
 // Create datasets for different integer types
+
+use Rcalicdan\MySQLBinaryProtocol\Buffer\Reader\BinaryIntegerReader;
+
 dataset('one_byte_integers', [
     'zero' => ["\x00", 0],
     'max_value' => ["\xFF", 255],

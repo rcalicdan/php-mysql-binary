@@ -1,10 +1,10 @@
 <?php
 
-use Rcalicdan\MySQLBinaryProtocol\BufferPayloadReaderFactory;
-use Rcalicdan\MySQLBinaryProtocol\ReadBuffer;
-use Rcalicdan\MySQLBinaryProtocol\PayloadReader;
-use Rcalicdan\MySQLBinaryProtocol\InvalidBinaryDataException;
-use Rcalicdan\MySQLBinaryProtocol\IncompleteBufferException;
+use Rcalicdan\MySQLBinaryProtocol\Buffer\ReadBuffer;
+use Rcalicdan\MySQLBinaryProtocol\Buffer\Reader\BufferPayloadReaderFactory;
+use Rcalicdan\MySQLBinaryProtocol\Exception\IncompleteBufferException;
+use Rcalicdan\MySQLBinaryProtocol\Exception\InvalidBinaryDataException;
+use Rcalicdan\MySQLBinaryProtocol\Packet\PayloadReader;
 
 beforeEach(function () {
     $this->payloadReaderFactory = new BufferPayloadReaderFactory();

@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Rcalicdan\MySQLBinaryProtocol\ReadBuffer;
-use Rcalicdan\MySQLBinaryProtocol\IncompleteBufferException;
+use Rcalicdan\MySQLBinaryProtocol\Buffer\ReadBuffer;
+use Rcalicdan\MySQLBinaryProtocol\Exception\IncompleteBufferException;
 
 beforeEach(function () {
     $this->readBuffer = new ReadBuffer();
