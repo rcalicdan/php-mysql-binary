@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace EcomDev\MySQLBinaryProtocol;
+namespace Rcalicdan\MySQLBinaryProtocol;
 
 /**
  * Reader for buffer fragments

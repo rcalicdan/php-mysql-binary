@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace EcomDev\MySQLBinaryProtocol;
+namespace Rcalicdan\MySQLBinaryProtocol;
 
 
 class BufferPayloadReader implements PayloadReader
@@ -53,7 +53,7 @@ class BufferPayloadReader implements PayloadReader
     /**
      * {@inheritDoc}
      */
-    public function readLengthEncodedIntegerOrNull()
+    public function readLengthEncodedIntegerOrNull(): float|int|null
     {
         $firstByte = $this->readFixedInteger(1);
 

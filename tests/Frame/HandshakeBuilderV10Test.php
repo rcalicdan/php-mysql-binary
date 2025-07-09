@@ -6,12 +6,12 @@
 
 declare(strict_types=1);
 
-namespace EcomDev\MySQLBinaryProtocol\Frame;
+namespace Rcalicdan\MySQLBinaryProtocol\Frame;
 
 
-use EcomDev\MySQLBinaryProtocol\CapabilityFlags;
-use EcomDev\MySQLBinaryProtocol\CharsetIdentifiers;
-use EcomDev\MySQLBinaryProtocol\StatusFlags;
+use Rcalicdan\MySQLBinaryProtocol\CapabilityFlags;
+use Rcalicdan\MySQLBinaryProtocol\CharsetIdentifiers;
+use Rcalicdan\MySQLBinaryProtocol\StatusFlags;
 use PHPUnit\Framework\TestCase;
 
 class HandshakeBuilderV10Test extends TestCase

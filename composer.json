@@ -1,12 +1,12 @@
 {
-    "name": "ecomdv/mysql-binary-protocol",
-    "description": "Implementation of MySQL binary protocol independent from async frameworks",
+    "name": "rcalicdan/mysql-binary-protocol",
+    "description": "Mysql Binary Protocol for my fiber async libary credits to Ivan Chepurnyi this a modernise implementation of his works",
     "type": "library",
     "license": "MIT",
     "authors": [
         {
-            "name": "Ivan Chepurnyi",
-            "email": "ivan.chepurnyi@ecomdev.org"
+            "name": "Reymart A. Calicdan",
+            "email": "reymart.calicdan06@gmail.com"
         }
     ],
     "minimum-stability": "stable",
@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "EcomDev\\MySQLBinaryProtocol\\": "src/"
+            "Rcalicdan\\MySQLBinaryProtocol\\": "src/"
         }
     },
     "autoload-dev": {

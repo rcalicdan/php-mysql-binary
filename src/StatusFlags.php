@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace EcomDev\MySQLBinaryProtocol;
+namespace Rcalicdan\MySQLBinaryProtocol;
 
 /**
  * Collection of server status flags sent in OK packet

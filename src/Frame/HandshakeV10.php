@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace EcomDev\MySQLBinaryProtocol\Frame;
+namespace Rcalicdan\MySQLBinaryProtocol\Frame;
 
 
 class HandshakeV10

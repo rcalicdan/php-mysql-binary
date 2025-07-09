@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace EcomDev\MySQLBinaryProtocol;
+namespace Rcalicdan\MySQLBinaryProtocol;
 
-use EcomDev\MySQLBinaryProtocol\Frame\HandshakeV10Builder;
+use Rcalicdan\MySQLBinaryProtocol\Frame\HandshakeV10Builder;
 
 class HandshakeParser
 {

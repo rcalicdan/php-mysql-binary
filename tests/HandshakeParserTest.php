@@ -6,11 +6,11 @@
 
 declare(strict_types=1);
 
-namespace EcomDev\MySQLBinaryProtocol;
+namespace Rcalicdan\MySQLBinaryProtocol;
 
 
-use EcomDev\MySQLBinaryProtocol\Frame\HandshakeV10;
-use EcomDev\MySQLBinaryProtocol\Frame\HandshakeV10Builder;
+use Rcalicdan\MySQLBinaryProtocol\Frame\HandshakeV10;
+use Rcalicdan\MySQLBinaryProtocol\Frame\HandshakeV10Builder;
 use PHPUnit\Framework\TestCase;
 
 class HandshakeParserTest extends TestCase

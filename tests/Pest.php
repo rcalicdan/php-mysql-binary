@@ -1,6 +1,6 @@
 <?php
 
-use EcomDev\MySQLBinaryProtocol\BinaryIntegerReader;
+use Rcalicdan\MySQLBinaryProtocol\BinaryIntegerReader;
 
 /*
 |--------------------------------------------------------------------------
