@@ -1,0 +1,37 @@
+{
+    "name": "ecomdv/mysql-binary-protocol",
+    "description": "Implementation of MySQL binary protocol independent from async frameworks",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ivan Chepurnyi",
+            "email": "ivan.chepurnyi@ecomdev.org"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "EcomDev\\MySQLBinaryProtocol\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "EcomDev\\MySQLBinaryProtocol\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "pestphp/pest": "^3.8"
+    },
+    "scripts": {
+        "test": "phpunit --colors --coverage-text"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
+}
