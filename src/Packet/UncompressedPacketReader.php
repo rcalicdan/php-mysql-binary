@@ -6,35 +6,21 @@ namespace Rcalicdan\MySQLBinaryProtocol\Packet;
 
 use Rcalicdan\MySQLBinaryProtocol\Buffer\ReadBuffer;
 use Rcalicdan\MySQLBinaryProtocol\Buffer\Reader\BinaryIntegerReader;
+use Rcalicdan\MySQLBinaryProtocol\Buffer\Reader\BufferPayloadReader;
 use Rcalicdan\MySQLBinaryProtocol\Buffer\Reader\BufferPayloadReaderFactory;
 use Rcalicdan\MySQLBinaryProtocol\Exception\IncompleteBufferException;
 
-/**
- * Reads uncompressed MySQL protocol packets from a data stream.
- * 
- * This implementation handles the standard MySQL packet format with
- * 3-byte length header and 1-byte sequence number, supporting
- * multi-packet messages and proper sequencing.
- */
 class UncompressedPacketReader implements PacketReader
 {
     private const LENGTH = 0;
     private const SEQUENCE = 1;
-
     private int $awaitedPacketLength = 0;
     private array $packets = [];
     private array $remainingPacketLength = [];
     private BinaryIntegerReader $binaryIntegerReader;
     private ReadBuffer $readBuffer;
-    private BufferPayloadReaderFactory $payloadReaderFactory;
+    private BufferPayloadReader $payloadReader;
 
-    /**
-     * Creates a new uncompressed packet reader.
-     *
-     * @param BinaryIntegerReader $binaryIntegerReader Reader for binary integers
-     * @param ReadBuffer $readBuffer Buffer for storing incoming data
-     * @param BufferPayloadReaderFactory $payloadReaderFactory Factory for payload readers
-     */
     public function __construct(
         BinaryIntegerReader $binaryIntegerReader,
         ReadBuffer $readBuffer,
@@ -42,14 +28,12 @@ class UncompressedPacketReader implements PacketReader
     ) {
         $this->binaryIntegerReader = $binaryIntegerReader;
         $this->readBuffer = $readBuffer;
-        $this->payloadReaderFactory = $payloadReaderFactory;
+        $this->payloadReader = $payloadReaderFactory->createFromBuffer(
+            $this->readBuffer,
+            $this->remainingPacketLength
+        );
     }
 
-    /**
-     * Appends raw data to the packet reader and processes any complete packets.
-     *
-     * @param string $data The raw binary data to append
-     */
     public function append(string $data): void
     {
         do {
@@ -57,17 +41,20 @@ class UncompressedPacketReader implements PacketReader
         } while ($data !== '');
     }
 
-    /**
-     * Attempts to read a complete packet payload using the provided reader callback.
-     *
-     * @param callable $reader Callback function to process the payload
-     * @return bool True if a complete packet was processed, false if more data is needed
-     */
+    public function hasPacket(): bool
+    {
+        return !empty($this->packets);
+    }
+
     public function readPayload(callable $reader): bool
     {
+        if (!$this->hasPacket()) {
+            throw new IncompleteBufferException('No packet available to read.');
+        }
+
         try {
             $reader(
-                $this->payloadReaderFactory->createFromBuffer($this->readBuffer, $this->remainingPacketLength),
+                $this->payloadReader,
                 $this->packets[0][self::LENGTH],
                 $this->packets[0][self::SEQUENCE]
             );
@@ -75,16 +62,9 @@ class UncompressedPacketReader implements PacketReader
         } catch (IncompleteBufferException $exception) {
             return false;
         }
-
         return true;
     }
 
-    /**
-     * Registers a new packet from the provided data stream.
-     *
-     * @param string $dataToParse The data to parse for packet information
-     * @return string Any remaining unparsed data
-     */
     private function registerPacket(string $dataToParse): string
     {
         if ($this->awaitedPacketLength) {
@@ -94,11 +74,15 @@ class UncompressedPacketReader implements PacketReader
             return substr($dataToParse, $trimLength);
         }
 
+        if (strlen($dataToParse) < 4) {
+            $this->readBuffer->append($dataToParse);
+            return '';
+        }
+
         $this->awaitedPacketLength = $this->binaryIntegerReader->readFixed(
             substr($dataToParse, 0, 3),
             3
         );
-
         $this->packets[] = [
             self::LENGTH => $this->awaitedPacketLength,
             self::SEQUENCE => $this->binaryIntegerReader->readFixed($dataToParse[3], 1)
@@ -106,26 +90,26 @@ class UncompressedPacketReader implements PacketReader
 
         $this->remainingPacketLength[] = $this->awaitedPacketLength;
 
-        return substr($dataToParse, 4);
+        $payloadData = substr($dataToParse, 4);
+        $trimLength = min(strlen($payloadData), $this->awaitedPacketLength);
+        if ($trimLength > 0) {
+            $this->readBuffer->append(substr($payloadData, 0, $trimLength));
+        }
+        $this->awaitedPacketLength -= $trimLength;
+
+        return substr($payloadData, $trimLength);
     }
 
-    /**
-     * Advances the packet tracking based on the number of bytes read.
-     *
-     * @param int $readLength Number of bytes that were read from the buffer
-     */
     private function advancePacketLength(int $readLength): void
     {
-        while ($this->remainingPacketLength[0] <= $readLength) {
+        while (isset($this->remainingPacketLength[0]) && $this->remainingPacketLength[0] <= $readLength) {
             $readLength -= $this->remainingPacketLength[0];
             array_shift($this->packets);
             array_shift($this->remainingPacketLength);
-
-            if (!$this->packets) {
-                return;
-            }
         }
 
-        $this->remainingPacketLength[0] -= $readLength;
+        if (isset($this->remainingPacketLength[0])) {
+            $this->remainingPacketLength[0] -= $readLength;
+        }
     }
 }
