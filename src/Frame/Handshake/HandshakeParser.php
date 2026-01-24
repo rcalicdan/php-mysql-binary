@@ -13,7 +13,7 @@ use Rcalicdan\MySQLBinaryProtocol\Packet\PayloadReader;
  * This parser extracts handshake information from the binary protocol payload
  * and constructs a HandshakeV10 frame object using the builder pattern.
  */
-class HandshakeParser
+final class HandshakeParser
 {
     private HandshakeV10Builder $frameBuilder;
     private mixed $frameReceiver;

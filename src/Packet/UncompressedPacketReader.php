@@ -12,8 +12,8 @@ use Rcalicdan\MySQLBinaryProtocol\Exception\IncompleteBufferException;
 
 class UncompressedPacketReader implements PacketReader
 {
-    private const LENGTH = 0;
-    private const SEQUENCE = 1;
+    private const int LENGTH = 0;
+    private const int SEQUENCE = 1;
     private int $awaitedPacketLength = 0;
     private array $packets = [];
     private array $remainingPacketLength = [];

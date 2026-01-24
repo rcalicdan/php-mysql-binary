@@ -10,20 +10,20 @@ namespace Rcalicdan\MySQLBinaryProtocol\Constants;
  * These flags indicate the current state of the MySQL server
  * and are included in various protocol responses.
  */
-class StatusFlags
+final class StatusFlags
 {
-    public const SERVER_STATUS_IN_TRANS = 0x01;
-    public const SERVER_STATUS_AUTOCOMMIT = 0x02;
-    public const SERVER_MORE_RESULTS_EXISTS = 0x08;
-    public const SERVER_STATUS_NO_GOOD_INDEX_USED = 0x10;
-    public const SERVER_STATUS_NO_INDEX_USED = 0x20;
-    public const SERVER_STATUS_CURSOR_EXISTS = 0x40;
-    public const SERVER_STATUS_LAST_ROW_SENT = 0x80;
-    public const SERVER_STATUS_DB_DROPPED = 0x0100;
-    public const SERVER_STATUS_NO_BACKSLASH_ESCAPES = 0x0200;
-    public const SERVER_STATUS_METADATA_CHANGED = 0x0400;
-    public const SERVER_QUERY_WAS_SLOW = 0x0800;
-    public const SERVER_PS_OUT_PARAMS = 0x1000;
-    public const SERVER_STATUS_IN_TRANS_READONLY = 0x2000;
-    public const SERVER_SESSION_STATE_CHANGED = 0x4000;
+    public const int SERVER_STATUS_IN_TRANS = 0x01;
+    public const int SERVER_STATUS_AUTOCOMMIT = 0x02;
+    public const int SERVER_MORE_RESULTS_EXISTS = 0x08;
+    public const int SERVER_STATUS_NO_GOOD_INDEX_USED = 0x10;
+    public const int SERVER_STATUS_NO_INDEX_USED = 0x20;
+    public const int SERVER_STATUS_CURSOR_EXISTS = 0x40;
+    public const int SERVER_STATUS_LAST_ROW_SENT = 0x80;
+    public const int SERVER_STATUS_DB_DROPPED = 0x0100;
+    public const int SERVER_STATUS_NO_BACKSLASH_ESCAPES = 0x0200;
+    public const int SERVER_STATUS_METADATA_CHANGED = 0x0400;
+    public const int SERVER_QUERY_WAS_SLOW = 0x0800;
+    public const int SERVER_PS_OUT_PARAMS = 0x1000;
+    public const int SERVER_STATUS_IN_TRANS_READONLY = 0x2000;
+    public const int SERVER_SESSION_STATE_CHANGED = 0x4000;
 }

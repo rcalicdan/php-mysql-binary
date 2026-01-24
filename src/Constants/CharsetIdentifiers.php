@@ -10,9 +10,9 @@ namespace Rcalicdan\MySQLBinaryProtocol\Constants;
  * These constants define the numeric identifiers for common
  * character sets used in MySQL protocol communication.
  */
-class CharsetIdentifiers
+final class CharsetIdentifiers
 {
-    public const UTF8 = 33;
-    public const LATIN1 = 8;
-    public const UTF8MB4 = 255;
+    public const int UTF8 = 33;
+    public const int LATIN1 = 8;
+    public const int UTF8MB4 = 255;
 }
