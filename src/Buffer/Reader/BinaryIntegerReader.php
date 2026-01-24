@@ -48,7 +48,7 @@ class BinaryIntegerReader
      */
     private function readUnsigned1ByteInteger(string $binary): int
     {
-        if (strlen($binary) < 1) {
+        if (\strlen($binary) < 1) {
             throw new InvalidArgumentException('Insufficient data for 1 byte integer');
         }
 
@@ -65,7 +65,7 @@ class BinaryIntegerReader
      */
     private function readUnsigned2ByteInteger(string $binary): int
     {
-        if (strlen($binary) < 2) {
+        if (\strlen($binary) < 2) {
             throw new InvalidArgumentException('Insufficient data for 2 byte integer');
         }
 
@@ -82,7 +82,7 @@ class BinaryIntegerReader
      */
     private function readUnsigned3ByteInteger(string $binary): int
     {
-        if (strlen($binary) < 3) {
+        if (\strlen($binary) < 3) {
             throw new InvalidArgumentException('Insufficient data for 3 byte integer');
         }
 
@@ -98,7 +98,7 @@ class BinaryIntegerReader
      */
     private function readUnsigned4ByteInteger(string $binary): int
     {
-        if (strlen($binary) < 4) {
+        if (\strlen($binary) < 4) {
             throw new InvalidArgumentException('Insufficient data for 4 byte integer');
         }
 
@@ -115,11 +115,11 @@ class BinaryIntegerReader
      */
     private function readUnsigned8ByteInteger(string $binary): int|float
     {
-        if (strlen($binary) < 8) {
+        if (\strlen($binary) < 8) {
             throw new InvalidArgumentException('Insufficient data for 8 byte integer');
         }
 
-        if (strlen($binary) > 8) {
+        if (\strlen($binary) > 8) {
             $binary = substr($binary, 0, 8);
         }
 
@@ -136,7 +136,7 @@ class BinaryIntegerReader
      */
     private function readVariableSizeInteger(string $binary, int $size): int|float
     {
-        if (strlen($binary) < $size) {
+        if (\strlen($binary) < $size) {
             throw new InvalidArgumentException("Insufficient data for {$size} byte integer");
         }
 
