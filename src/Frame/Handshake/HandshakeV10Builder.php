@@ -10,7 +10,7 @@ namespace Rcalicdan\MySQLBinaryProtocol\Frame\Handshake;
  * This builder provides a fluent interface for constructing handshake frames
  * with various optional parameters while maintaining immutability.
  */
-class HandshakeV10Builder
+final class HandshakeV10Builder
 {
     private string $serverVersion;
     private int $clientId;
