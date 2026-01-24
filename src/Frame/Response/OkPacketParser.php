@@ -34,7 +34,8 @@ final readonly class OkPacketParser implements FrameParser
             (int)$lastInsertId,
             (int)$statusFlags,
             (int)$warnings,
-            $info
+            $info,
+            $sequenceNumber
         );
     }
 }

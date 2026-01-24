@@ -32,7 +32,7 @@ final readonly class HandshakeV10 implements Frame
         public int $capabilities,
         public int $charset = 0,
         public int $status = 0,
-        public string $authPlugin = ''
-    ) {
-    }
+        public string $authPlugin = '',
+        public int $sequenceNumber = 0
+    ) {}
 }

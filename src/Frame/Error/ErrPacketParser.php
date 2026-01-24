@@ -31,7 +31,8 @@ class ErrPacketParser implements FrameParser
             (int)$errorCode,
             $sqlStateMarker,
             $sqlState,
-            $errorMessage
+            $errorMessage,
+            $sequenceNumber
         );
     }
 }

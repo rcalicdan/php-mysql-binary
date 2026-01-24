@@ -18,6 +18,7 @@ final readonly class OkPacket implements Frame
         public int $lastInsertId,
         public int $statusFlags,
         public int $warnings,
-        public string $info
+        public string $info,
+        public int $sequenceNumber 
     ) {}
 }

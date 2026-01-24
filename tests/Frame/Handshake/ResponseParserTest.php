@@ -18,8 +18,10 @@ test('parses OK packet correctly', function () {
         ->and($packet->lastInsertId)->toBe(5)
         ->and($packet->statusFlags)->toBe(2)
         ->and($packet->warnings)->toBe(0)
-        ->and($packet->info)->toBe('Success');
+        ->and($packet->info)->toBe('Success')
+        ->and($packet->sequenceNumber)->toBe(1);  
 });
+
 
 test('parses OK packet with large LENENC integers', function () {
     $payloadData = "\x00\xFC\xFB\x00\x00\x02\x00\x00\x00";
@@ -44,5 +46,6 @@ test('parses ERR packet correctly', function () {
         ->and($packet->errorCode)->toBe(1049)
         ->and($packet->sqlStateMarker)->toBe('#')
         ->and($packet->sqlState)->toBe('42000')
-        ->and($packet->errorMessage)->toBe($errorMsg);
+        ->and($packet->errorMessage)->toBe($errorMsg)
+        ->and($packet->sequenceNumber)->toBe(1);  
 });

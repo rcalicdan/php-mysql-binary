@@ -11,12 +11,13 @@ use Rcalicdan\MySQLBinaryProtocol\Frame\Frame;
  * 
  * Sent by the server to signal that an error occurred.
  */
-class ErrPacket implements Frame
+final readonly class ErrPacket implements Frame
 {
     public function __construct(
         public int $errorCode,
         public string $sqlStateMarker,
         public string $sqlState,
-        public string $errorMessage
+        public string $errorMessage,
+        public int $sequenceNumber
     ) {}
 }
