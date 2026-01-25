@@ -4,6 +4,8 @@ use Rcalicdan\MySQLBinaryProtocol\Frame\Error\ErrPacket;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Error\ErrPacketParser;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Response\OkPacket;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Response\OkPacketParser;
+use Rcalicdan\MySQLBinaryProtocol\Frame\Response\StmtPrepareOkPacket;
+use Rcalicdan\MySQLBinaryProtocol\Frame\Response\StmtPrepareOkPacketParser;
 
 test('parses OK packet correctly', function () {
     $payloadData = "\x00\x01\x05\x02\x00\x00\x00Success";
@@ -31,6 +33,43 @@ test('parses OK packet with large LENENC integers', function () {
     $packet = (new OkPacketParser())->parse($reader, strlen($payloadData), 1);
 
     expect($packet->affectedRows)->toBe(251);
+});
+
+test('parses StmtPrepareOk packet correctly', function () {
+    $payloadData = "\x00"          
+        . "\x01\x00\x00\x00"       
+        . "\x03\x00"              
+        . "\x02\x00"              
+        . "\x00"                   
+        . "\x05\x00";               
+    
+    $reader = createReader($payloadData);
+
+    $parser = new StmtPrepareOkPacketParser();
+    /** @var StmtPrepareOkPacket $packet */
+    $packet = $parser->parse($reader, strlen($payloadData), 1);
+
+    expect($packet)->toBeInstanceOf(StmtPrepareOkPacket::class)
+        ->and($packet->statementId)->toBe(1)
+        ->and($packet->numColumns)->toBe(3)
+        ->and($packet->numParams)->toBe(2)
+        ->and($packet->warningCount)->toBe(5)
+        ->and($packet->sequenceNumber)->toBe(1);
+});
+
+test('parses StmtPrepareOk packet with zero parameters and columns', function () {
+    $payloadData = "\x00\x0A\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
+    $reader = createReader($payloadData);
+
+    /** @var StmtPrepareOkPacket $packet */
+    $packet = (new StmtPrepareOkPacketParser())
+        ->parse($reader, strlen($payloadData), 2);
+
+    expect($packet->statementId)->toBe(10)
+        ->and($packet->numColumns)->toBe(0)
+        ->and($packet->numParams)->toBe(0)
+        ->and($packet->warningCount)->toBe(0)
+        ->and($packet->sequenceNumber)->toBe(2);
 });
 
 test('parses ERR packet correctly', function () {

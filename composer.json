@@ -27,7 +27,7 @@
         "pestphp/pest": "^4.0"
     },
     "scripts": {
-        "test": "phpunit --colors --coverage-text"
+        "test": "vendor/bin/pest"
     },
     "config": {
         "allow-plugins": {
