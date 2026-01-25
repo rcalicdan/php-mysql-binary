@@ -16,5 +16,6 @@ final readonly class BinaryRow implements Frame
      */
     public function __construct(
         public array $values
-    ) {}
+    ) {
+    }
 }

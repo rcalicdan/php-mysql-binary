@@ -10,7 +10,7 @@ use Rcalicdan\MySQLBinaryProtocol\Packet\PayloadReader;
 
 /**
  * Parser for the OK Packet.
- * 
+ *
  * Expects the payload to start with 0x00.
  */
 final readonly class OkPacketParser implements FrameParser

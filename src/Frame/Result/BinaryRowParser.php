@@ -17,7 +17,8 @@ class BinaryRowParser implements FrameParser
      */
     public function __construct(
         private array $columns
-    ) {}
+    ) {
+    }
 
     public function parse(PayloadReader $payload, int $length, int $sequenceNumber): Frame
     {
@@ -31,9 +32,10 @@ class BinaryRowParser implements FrameParser
         foreach ($this->columns as $i => $column) {
             if ($this->isColumnNull($nullBitmap, $i)) {
                 $values[] = null;
+
                 continue;
             }
-        
+
             $values[] = $this->parseColumnValue($payload, $column);
         }
 
@@ -45,8 +47,8 @@ class BinaryRowParser implements FrameParser
         $bitPosition = $columnIndex + 2;
         $byteIndex = (int) floor($bitPosition / 8);
 
-        if (!isset($nullBitmap[$byteIndex])) {
-            return false; 
+        if (! isset($nullBitmap[$byteIndex])) {
+            return false;
         }
 
         $byte = \ord($nullBitmap[$byteIndex]);
@@ -74,7 +76,9 @@ class BinaryRowParser implements FrameParser
     {
         $length = $reader->readFixedInteger(1);
 
-        if ($length === 0) return null;
+        if ($length === 0) {
+            return null;
+        }
 
         $year = $reader->readFixedInteger(2);
         $month = $reader->readFixedInteger(1);
@@ -91,19 +95,22 @@ class BinaryRowParser implements FrameParser
         if ($length === 7) {
             return \sprintf('%04d-%02d-%02d %02d:%02d:%02d', $year, $month, $day, $hour, $minute, $second);
         }
-        
+
         if ($length === 11) {
-             $microsecond = $reader->readFixedInteger(4);
-             return \sprintf('%04d-%02d-%02d %02d:%02d:%02d.%06d', $year, $month, $day, $hour, $minute, $second, $microsecond);
+            $microsecond = $reader->readFixedInteger(4);
+
+            return \sprintf('%04d-%02d-%02d %02d:%02d:%02d.%06d', $year, $month, $day, $hour, $minute, $second, $microsecond);
         }
 
         throw new InvalidBinaryDataException("Invalid DATETIME length: {$length}");
     }
-    
+
     private function parseTime(PayloadReader $reader): ?string
     {
         $length = $reader->readFixedInteger(1);
-        if ($length === 0) return null; 
+        if ($length === 0) {
+            return null;
+        }
 
         $isNegative = $reader->readFixedInteger(1);
         $days = $reader->readFixedInteger(4);
@@ -113,12 +120,12 @@ class BinaryRowParser implements FrameParser
 
         $totalHours = ($days * 24) + $hours;
         $timeStr = \sprintf('%s%02d:%02d:%02d', $isNegative ? '-' : '', $totalHours, $minutes, $seconds);
-        
+
         if ($length === 12) {
             $microseconds = $reader->readFixedInteger(4);
             $timeStr .= sprintf('.%06d', $microseconds);
         }
-        
+
         return $timeStr;
     }
 }

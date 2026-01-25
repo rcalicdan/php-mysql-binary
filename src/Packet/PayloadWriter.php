@@ -40,7 +40,7 @@ interface PayloadWriter
      * @return self Returns the instance for method chaining
      */
     public function writeUInt64(int $value): self;
-    
+
     /**
      * Writes a MySQL Length-Encoded Integer (LENENC).
      * This is used to prefix string lengths and null bitmaps.

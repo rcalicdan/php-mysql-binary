@@ -7,6 +7,12 @@ namespace Rcalicdan\MySQLBinaryProtocol\Frame\Command;
 use Rcalicdan\MySQLBinaryProtocol\Buffer\Writer\BufferPayloadWriterFactory;
 use Rcalicdan\MySQLBinaryProtocol\Constants\Command;
 
+/**
+ * Builder for building MySQL command packets.
+ *
+ * This builder class is responsible for building MySQL command packets.
+ * It takes a command and optional parameters and builds the packet accordingly.
+ */
 class CommandBuilder
 {
     private BufferPayloadWriterFactory $writerFactory;
@@ -19,8 +25,7 @@ class CommandBuilder
         $this->writerFactory = $writerFactory ?? new BufferPayloadWriterFactory();
         $this->parameterBuilder = $parameterBuilder ?? new ParameterBuilder($this->writerFactory);
     }
-    
-    
+
     /**
      * Builds a COM_QUERY packet (Standard SQL execution).
      */
@@ -29,7 +34,8 @@ class CommandBuilder
         return $this->writerFactory->create()
             ->writeUInt8(Command::QUERY)
             ->writeString($sql)
-            ->toString();
+            ->toString()
+        ;
     }
 
     /**
@@ -39,7 +45,8 @@ class CommandBuilder
     {
         return $this->writerFactory->create()
             ->writeUInt8(Command::PING)
-            ->toString();
+            ->toString()
+        ;
     }
 
     /**
@@ -49,7 +56,8 @@ class CommandBuilder
     {
         return $this->writerFactory->create()
             ->writeUInt8(Command::QUIT)
-            ->toString();
+            ->toString()
+        ;
     }
 
     /**
@@ -60,7 +68,8 @@ class CommandBuilder
         return $this->writerFactory->create()
             ->writeUInt8(Command::INIT_DB)
             ->writeString($databaseName)
-            ->toString();
+            ->toString()
+        ;
     }
 
     /**
@@ -71,7 +80,8 @@ class CommandBuilder
         return $this->writerFactory->create()
             ->writeUInt8(Command::STMT_PREPARE)
             ->writeString($sql)
-            ->toString();
+            ->toString()
+        ;
     }
 
     /**
@@ -82,11 +92,14 @@ class CommandBuilder
         return $this->writerFactory->create()
             ->writeUInt8(Command::STMT_CLOSE)
             ->writeUInt32($statementId)
-            ->toString();
+            ->toString()
+        ;
     }
 
     /**
      * Builds a COM_STMT_EXECUTE packet.
+     *
+     * @param array<int, mixed> $params
      */
     public function buildStmtExecute(int $statementId, array $params, int $flags = 0): string
     {
@@ -95,14 +108,16 @@ class CommandBuilder
         $writer->writeUInt8(Command::STMT_EXECUTE)
             ->writeUInt32($statementId)
             ->writeUInt8($flags)
-            ->writeUInt32(1); // Iteration count
+            ->writeUInt32(1) // Iteration count
+        ;
 
-        if (!empty($params)) {
+        if (! empty($params)) {
             $boundParams = $this->parameterBuilder->build($params);
             $writer->writeString($boundParams->nullBitmap)
                 ->writeUInt8(1) // new-params-bound-flag
                 ->writeString($boundParams->types)
-                ->writeString($boundParams->values);
+                ->writeString($boundParams->values)
+            ;
         }
 
         return $writer->toString();

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Rcalicdan\MySQLBinaryProtocol\Factory\DefaultPacketWriterFactory;
 use Rcalicdan\MySQLBinaryProtocol\Packet\UncompressedPacketWriter;
 

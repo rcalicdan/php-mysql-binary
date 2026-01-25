@@ -6,7 +6,7 @@ namespace Rcalicdan\MySQLBinaryProtocol\Constants;
 
 /**
  * MySQL server status flags.
- * 
+ *
  * These flags indicate the current state of the MySQL server
  * and are included in various protocol responses.
  */

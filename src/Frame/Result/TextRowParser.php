@@ -12,12 +12,13 @@ class TextRowParser implements FrameParser
 {
     public function __construct(
         private int $columnCount
-    ) {}
+    ) {
+    }
 
     public function parse(PayloadReader $payload, int $length, int $sequenceNumber): Frame
     {
         $values = [];
-        
+
         for ($i = 0; $i < $this->columnCount; $i++) {
             $values[] = $payload->readLengthEncodedStringOrNull();
         }

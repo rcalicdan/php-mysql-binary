@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Rcalicdan\MySQLBinaryProtocol\Packet;
 
-use Rcalicdan\MySQLBinaryProtocol\Buffer\Writer\BinaryWriter;
 use InvalidArgumentException;
+use Rcalicdan\MySQLBinaryProtocol\Buffer\Writer\BinaryWriter;
 
 class UncompressedPacketWriter implements PacketWriter
 {
-    private const int MAX_PACKET_SIZE = 16777215; 
+    private const int MAX_PACKET_SIZE = 16777215;
 
     private BinaryWriter $binaryWriter;
 
@@ -28,7 +28,7 @@ class UncompressedPacketWriter implements PacketWriter
             );
         }
 
-        $header = $this->binaryWriter->writeUInt24($length) . 
+        $header = $this->binaryWriter->writeUInt24($length) .
                   $this->binaryWriter->writeUInt8($sequenceId);
 
         return $header . $payload;

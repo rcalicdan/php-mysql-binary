@@ -11,16 +11,23 @@ use Rcalicdan\MySQLBinaryProtocol\Packet\PayloadReader;
 
 class BufferPayloadReader implements PayloadReader
 {
-    private const LENGTH_MARKERS = [
+    private const array LENGTH_MARKERS = [
         0xfc => 2,
         0xfd => 3,
-        0xfe => 8
+        0xfe => 8,
     ];
     private const NULL_MARKER = 0xfb;
     private ReadBuffer $buffer;
     private BinaryIntegerReader $integerReader;
+
+    /**
+     *  @var array<int, int>
+     */
     private array $unreadPacketLength;
 
+    /**
+     * @param array<int, int> $unreadPacketLength
+     */
     public function __construct(ReadBuffer $buffer, array &$unreadPacketLength, BinaryIntegerReader $integerReader)
     {
         $this->buffer = $buffer;
@@ -40,15 +47,16 @@ class BufferPayloadReader implements PayloadReader
     {
         $firstByte = $this->readFixedInteger(1);
         if ($firstByte < 251) {
-            return $firstByte;
+            return (int) $firstByte;
         }
         if ($firstByte === self::NULL_MARKER) {
             return null;
         }
-        if (isset(self::LENGTH_MARKERS[$firstByte])) {
-            return $this->readFixedInteger(self::LENGTH_MARKERS[$firstByte]);
+        if (! \is_int($firstByte) || ! isset(self::LENGTH_MARKERS[$firstByte])) {
+            throw new InvalidBinaryDataException();
         }
-        throw new InvalidBinaryDataException();
+
+        return $this->readFixedInteger(self::LENGTH_MARKERS[$firstByte]);
     }
 
     public function readFixedString(int $length): string
@@ -62,7 +70,8 @@ class BufferPayloadReader implements PayloadReader
         if ($length === null) {
             return null;
         }
-        return $this->buffer->read($length);
+
+        return $this->buffer->read((int) $length);
     }
 
     public function readNullTerminatedString(): string
@@ -73,6 +82,7 @@ class BufferPayloadReader implements PayloadReader
         }
         $string = $this->buffer->read($nullPosition - 1);
         $this->buffer->read(1);
+
         return $string;
     }
 
@@ -94,9 +104,10 @@ class BufferPayloadReader implements PayloadReader
             $currentBufferPosition -= $this->unreadPacketLength[$currentPacketIndex];
             $currentPacketIndex++;
         }
-        if (!isset($this->unreadPacketLength[$currentPacketIndex])) {
+        if (! isset($this->unreadPacketLength[$currentPacketIndex])) {
             return 0;
         }
+
         return $this->unreadPacketLength[$currentPacketIndex] - $currentBufferPosition;
     }
 }

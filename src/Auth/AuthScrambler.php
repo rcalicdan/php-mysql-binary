@@ -9,7 +9,7 @@ class AuthScrambler
     /**
      * Scrambles password using MySQL Native Password (SHA1 based).
      * Used for MySQL 5.7 and legacy connections.
-     * 
+     *
      * Algorithm: SHA1(password) XOR SHA1(nonce + SHA1(SHA1(password)))
      */
     public static function scrambleNativePassword(string $password, string $nonce): string
@@ -28,7 +28,7 @@ class AuthScrambler
     /**
      * Scrambles password using Caching SHA2 Password (SHA256 based).
      * Used for MySQL 8.0+.
-     * 
+     *
      * Algorithm: XOR(SHA256(password), SHA256(SHA256(SHA256(password)) + nonce))
      */
     public static function scrambleCachingSha2Password(string $password, string $nonce): string
@@ -42,9 +42,9 @@ class AuthScrambler
         $hash3 = hash('sha256', $hash2 . $nonce, true);
 
         $scrambled = '';
-        $length = strlen($hash1);
+        $length = \strlen($hash1);
         for ($i = 0; $i < $length; $i++) {
-            $scrambled .= chr(ord($hash1[$i]) ^ ord($hash3[$i]));
+            $scrambled .= \chr(\ord($hash1[$i]) ^ \ord($hash3[$i]));
         }
 
         return $scrambled;

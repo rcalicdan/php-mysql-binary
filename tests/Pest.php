@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Rcalicdan\MySQLBinaryProtocol\Buffer\Reader\BinaryIntegerReader;
 use Rcalicdan\MySQLBinaryProtocol\Buffer\Reader\BufferPayloadReaderFactory;
 use Rcalicdan\MySQLBinaryProtocol\Buffer\Writer\BufferPayloadWriter;
@@ -54,7 +56,8 @@ function buildColumnPayload(
         ->writeUInt8($type)
         ->writeUInt16(0)
         ->writeUInt8(0)
-        ->writeUInt16(0);
+        ->writeUInt16(0)
+    ;
 
     return $writer->toString();
 }

@@ -20,5 +20,6 @@ final readonly class ColumnDefinition implements Frame
         public int $type,
         public int $flags,
         public int $decimals
-    ) {}
+    ) {
+    }
 }

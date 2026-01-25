@@ -8,7 +8,7 @@ use Rcalicdan\MySQLBinaryProtocol\Frame\Frame;
 
 /**
  * Represents a MySQL ERR Packet.
- * 
+ *
  * Sent by the server to signal that an error occurred.
  */
 final readonly class ErrPacket implements Frame
@@ -19,5 +19,6 @@ final readonly class ErrPacket implements Frame
         public string $sqlState,
         public string $errorMessage,
         public int $sequenceNumber
-    ) {}
+    ) {
+    }
 }

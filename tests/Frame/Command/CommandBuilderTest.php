@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Rcalicdan\MySQLBinaryProtocol\Constants\Command;
 use Rcalicdan\MySQLBinaryProtocol\Constants\MysqlType;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Command\CommandBuilder;
@@ -13,21 +15,24 @@ test('builds query packet', function () {
     $packet = $this->builder->buildQuery($sql);
 
     expect(ord($packet[0]))->toBe(Command::QUERY)
-        ->and(substr($packet, 1))->toBe($sql);
+        ->and(substr($packet, 1))->toBe($sql)
+    ;
 });
 
 test('builds ping packet', function () {
     $packet = $this->builder->buildPing();
 
     expect(strlen($packet))->toBe(1)
-        ->and(ord($packet[0]))->toBe(Command::PING);
+        ->and(ord($packet[0]))->toBe(Command::PING)
+    ;
 });
 
 test('builds quit packet', function () {
     $packet = $this->builder->buildQuit();
 
     expect(strlen($packet))->toBe(1)
-        ->and(ord($packet[0]))->toBe(Command::QUIT);
+        ->and(ord($packet[0]))->toBe(Command::QUIT)
+    ;
 });
 
 test('builds init db packet', function () {
@@ -35,7 +40,8 @@ test('builds init db packet', function () {
     $packet = $this->builder->buildInitDb($db);
 
     expect(ord($packet[0]))->toBe(Command::INIT_DB)
-        ->and(substr($packet, 1))->toBe($db);
+        ->and(substr($packet, 1))->toBe($db)
+    ;
 });
 
 test('builds statement prepare packet', function () {
@@ -67,7 +73,7 @@ test('builds statement execute packet with parameters', function () {
     $packet = $this->builder->buildStmtExecute($statementId, $params);
 
     $header = chr(Command::STMT_EXECUTE) . pack('V', 1) . "\x00" . pack('V', 1);
-    
+
     $nullBitmap = "\x00";
     $newParamsFlag = "\x01";
     $types = pack('v', MysqlType::VAR_STRING) . pack('v', MysqlType::LONGLONG);

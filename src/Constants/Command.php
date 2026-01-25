@@ -6,7 +6,7 @@ namespace Rcalicdan\MySQLBinaryProtocol\Constants;
 
 /**
  * MySQL Protocol Command Bytes.
- * 
+ *
  * Used in the header of Command Packets sent by the client to the server.
  */
 final class Command

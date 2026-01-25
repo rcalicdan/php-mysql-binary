@@ -14,5 +14,6 @@ final readonly class StmtPrepareOkPacket implements Frame
         public int $numParams,
         public int $warningCount,
         public int $sequenceNumber
-    ) {}
+    ) {
+    }
 }

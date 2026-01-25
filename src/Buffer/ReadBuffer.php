@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Rcalicdan\MySQLBinaryProtocol\Buffer;
 
 use Rcalicdan\MySQLBinaryProtocol\Exception\IncompleteBufferException;
+
 use function strlen;
-use function substr;
 use function strpos;
+use function substr;
 
 /**
  * A buffer for reading binary data with support for partial reads and flushing.
- * 
+ *
  * This class provides a memory-efficient way to handle streaming binary data
  * by maintaining internal offsets and automatically managing buffer cleanup.
  */
@@ -53,13 +54,15 @@ class ReadBuffer
      */
     public function read(int $length): string
     {
-        if (!$this->isReadable($length)) {
+        if (! $this->isReadable($length)) {
             $this->currentBufferOffset = $this->readBufferOffset;
+
             throw new IncompleteBufferException();
         }
 
         $data = substr($this->buffer, $this->currentBufferOffset, $length);
         $this->currentBufferOffset += $length;
+
         return $data;
     }
 
@@ -102,6 +105,7 @@ class ReadBuffer
     public function scan(string $pattern): int
     {
         $position = strpos($this->buffer, $pattern, $this->currentBufferOffset);
+
         return $position === false ? -1 : ($position - $this->currentBufferOffset) + 1;
     }
 

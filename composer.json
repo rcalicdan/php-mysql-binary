@@ -20,14 +20,18 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "EcomDev\\MySQLBinaryProtocol\\": "tests/"
+            "Test\\": "tests/"
         }
     },
     "require-dev": {
-        "pestphp/pest": "^4.0"
+        "pestphp/pest": "^4.0",
+        "laravel/pint": "^1.0",
+        "phpstan/phpstan": "^2.0"
     },
     "scripts": {
-        "test": "vendor/bin/pest"
+        "test": "vendor/bin/pest",
+        "format": "vendor/bin/pint",
+        "analyze": "vendor/bin/phpstan analyze"
     },
     "config": {
         "allow-plugins": {

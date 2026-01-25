@@ -43,12 +43,12 @@ class UncompressedPacketReader implements PacketReader
 
     public function hasPacket(): bool
     {
-        return !empty($this->packets);
+        return ! empty($this->packets);
     }
 
     public function readPayload(callable $reader): bool
     {
-        if (!$this->hasPacket()) {
+        if (! $this->hasPacket()) {
             throw new IncompleteBufferException('No packet available to read.');
         }
 
@@ -62,6 +62,7 @@ class UncompressedPacketReader implements PacketReader
         } catch (IncompleteBufferException $exception) {
             return false;
         }
+
         return true;
     }
 
@@ -71,11 +72,13 @@ class UncompressedPacketReader implements PacketReader
             $trimLength = min(strlen($dataToParse), $this->awaitedPacketLength);
             $this->readBuffer->append(substr($dataToParse, 0, $trimLength));
             $this->awaitedPacketLength -= $trimLength;
+
             return substr($dataToParse, $trimLength);
         }
 
         if (strlen($dataToParse) < 4) {
             $this->readBuffer->append($dataToParse);
+
             return '';
         }
 
@@ -85,7 +88,7 @@ class UncompressedPacketReader implements PacketReader
         );
         $this->packets[] = [
             self::LENGTH => $this->awaitedPacketLength,
-            self::SEQUENCE => $this->binaryIntegerReader->readFixed($dataToParse[3], 1)
+            self::SEQUENCE => $this->binaryIntegerReader->readFixed($dataToParse[3], 1),
         ];
 
         $this->remainingPacketLength[] = $this->awaitedPacketLength;

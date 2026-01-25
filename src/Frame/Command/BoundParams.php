@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Rcalicdan\MySQLBinaryProtocol\Frame\Command;
 
 /**
- * A Value Object holding the binary components for prepared statement parameters.
+ * Represents bound parameters for COM_STMT_EXECUTE packets.
+ *
+ * This class holds the null bitmap, types, and values for bound parameters
+ * used in COM_STMT_EXECUTE packets.
  */
 final readonly class BoundParams
 {
@@ -13,5 +16,6 @@ final readonly class BoundParams
         public string $nullBitmap,
         public string $types,
         public string $values
-    ) {}
+    ) {
+    }
 }

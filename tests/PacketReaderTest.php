@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Rcalicdan\MySQLBinaryProtocol\Exception\InvalidBinaryDataException;
 use Rcalicdan\MySQLBinaryProtocol\Factory\DefaultPacketReaderFactory;
 use Rcalicdan\MySQLBinaryProtocol\Packet\PayloadReader;
@@ -14,6 +16,7 @@ function readPayload(callable $fragmentCallable)
     test()->reader->readPayload(function (...$args) use ($fragmentCallable, &$data) {
         $data = $fragmentCallable(...$args);
     });
+
     return $data;
 }
 
@@ -127,7 +130,7 @@ test('reads fixed length string', function () {
         return [
             $fragment->readFixedString(5),
             $fragment->readFixedString(6),
-            $fragment->readFixedString(13)
+            $fragment->readFixedString(13),
         ];
     });
 
@@ -143,7 +146,7 @@ test('reads length encoded string', function () {
             $fragment->readLengthEncodedStringOrNull(),
             $fragment->readLengthEncodedStringOrNull(),
             $fragment->readLengthEncodedStringOrNull(),
-            $fragment->readLengthEncodedStringOrNull()
+            $fragment->readLengthEncodedStringOrNull(),
         ];
     });
 
@@ -152,12 +155,12 @@ test('reads length encoded string', function () {
 
 test('reads multiple null terminated strings', function () {
     $this->reader->append("\x31\x00\x00\x00first_string\x00second_string\x00third_string\x00");
-    
+
     $data = readPayload(function (PayloadReader $fragmentReader) {
         return [
             $fragmentReader->readNullTerminatedString(),
             $fragmentReader->readNullTerminatedString(),
-            $fragmentReader->readNullTerminatedString()
+            $fragmentReader->readNullTerminatedString(),
         ];
     });
 
@@ -166,7 +169,7 @@ test('reads multiple null terminated strings', function () {
 
 test('stops reading payload when null character is not found for a string', function () {
     $this->reader->append("\x31\x00\x00\x00first_string");
-    
+
     $data = readPayload(function (PayloadReader $fragmentReader) {
         return $fragmentReader->readNullTerminatedString();
     });
@@ -200,6 +203,7 @@ test('reads string that represents remainder of the packet', function () {
     $result = readPayload(function (PayloadReader $payloadReader) {
         $payloadReader->readFixedInteger(1);
         $payloadReader->readFixedInteger(1);
+
         return $payloadReader->readRestOfPacketString();
     });
 
@@ -214,7 +218,7 @@ test('reads multiple packets packet strings added as single network packet in si
             $payloadReader->readRestOfPacketString(),
             $payloadReader->readRestOfPacketString(),
             $payloadReader->readRestOfPacketString(),
-            $payloadReader->readRestOfPacketString()
+            $payloadReader->readRestOfPacketString(),
         ];
     });
 
@@ -232,7 +236,7 @@ test('reads multiple packets packet strings added as single network packet in mu
         readPayload($readString),
         readPayload($readString),
         readPayload($readString),
-        readPayload($readString)
+        readPayload($readString),
     ];
 
     expect($results)->toEqual(['one', 'two', 'three', 'four']);
@@ -243,6 +247,7 @@ test('provides sequence number and packet length during reading of payload', fun
 
     $readString = function (PayloadReader $payloadReader, int $length, int $sequence) {
         $payloadReader->readNullTerminatedString();
+
         return [$length, $sequence];
     };
 

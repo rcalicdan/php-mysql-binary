@@ -135,7 +135,7 @@ test('flush returns number of read bytes', function () {
     $this->readBuffer->append('Some data');
     $this->readBuffer->read(4);
     $this->readBuffer->read(2);
-    
+
     expect($this->readBuffer->flush())->toBe(6);
 });
 

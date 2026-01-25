@@ -13,15 +13,15 @@ class ColumnDefinitionParser implements FrameParser
     public function parse(PayloadReader $payload, int $length, int $sequenceNumber): Frame
     {
         $catalog = $payload->readLengthEncodedStringOrNull() ?? '';
-        
+
         $schema = $payload->readLengthEncodedStringOrNull() ?? '';
-        
+
         $table = $payload->readLengthEncodedStringOrNull() ?? '';
-        
+
         $orgTable = $payload->readLengthEncodedStringOrNull() ?? '';
- 
+
         $name = $payload->readLengthEncodedStringOrNull() ?? '';
-        
+
         $orgName = $payload->readLengthEncodedStringOrNull() ?? '';
 
         $payload->readLengthEncodedIntegerOrNull();

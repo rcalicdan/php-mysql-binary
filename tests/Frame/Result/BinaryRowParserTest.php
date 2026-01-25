@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 use Rcalicdan\MySQLBinaryProtocol\Buffer\Writer\BufferPayloadWriter;
 use Rcalicdan\MySQLBinaryProtocol\Constants\MysqlType;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Result\BinaryRow;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Result\BinaryRowParser;
-
 
 test('parses row with a single string value', function () {
     $columns = [createColumnDef(MysqlType::VAR_STRING)];
@@ -22,7 +23,7 @@ test('parses row with multiple values including NULL', function () {
     $columns = [
         createColumnDef(MysqlType::VAR_STRING),
         createColumnDef(MysqlType::LONGLONG),
-        createColumnDef(MysqlType::TINY), 
+        createColumnDef(MysqlType::TINY),
     ];
 
     $nullBitmap = "\x10";
@@ -30,7 +31,8 @@ test('parses row with multiple values including NULL', function () {
     $values = (new BufferPayloadWriter())
         ->writeLengthEncodedString('test')
         ->writeUInt64(12345)
-        ->toString();
+        ->toString()
+    ;
 
     $parser = new BinaryRowParser($columns);
     $row = $parser->parse(createBinaryRowReader($nullBitmap . $values), 0, 1);
@@ -85,7 +87,7 @@ test('parses FLOAT', function () {
     $parser = new BinaryRowParser($columns);
     $row = $parser->parse(createBinaryRowReader($payload), 0, 1);
 
-    $epsilon = 0.0001; 
+    $epsilon = 0.0001;
     $actual = $row->values[0];
 
     expect(abs($actual - $expected) < $epsilon)->toBeTrue();
@@ -131,16 +133,16 @@ test('parses YEAR', function () {
 
 test('parses BLOB types as string', function () {
     $columns = [createColumnDef(MysqlType::BLOB)];
-    $payload = "\x00\x0a" . "binarydata"; 
+    $payload = "\x00\x0a" . 'binarydata';
     $parser = new BinaryRowParser($columns);
     $row = $parser->parse(createBinaryRowReader($payload), 0, 1);
-    expect($row->values[0])->toBe("binarydata");
+    expect($row->values[0])->toBe('binarydata');
 });
 
 test('parses JSON as string', function () {
     $columns = [createColumnDef(MysqlType::JSON)];
     $json = '{"key":"value"}';
-    $payload = "\x00" . chr(strlen($json)) . $json; 
+    $payload = "\x00" . chr(strlen($json)) . $json;
     $parser = new BinaryRowParser($columns);
     $row = $parser->parse(createBinaryRowReader($payload), 0, 1);
     expect($row->values[0])->toBe($json);

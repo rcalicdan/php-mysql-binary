@@ -12,7 +12,7 @@ class StmtPrepareOkPacketParser implements FrameParser
 {
     public function parse(PayloadReader $payload, int $length, int $sequenceNumber): Frame
     {
-        $payload->readFixedInteger(1); 
+        $payload->readFixedInteger(1);
 
         $statementId = $payload->readFixedInteger(4);
 

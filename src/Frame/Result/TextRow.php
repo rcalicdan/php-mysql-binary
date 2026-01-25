@@ -13,5 +13,6 @@ final readonly class TextRow implements Frame
      */
     public function __construct(
         public array $values
-    ) {}
+    ) {
+    }
 }

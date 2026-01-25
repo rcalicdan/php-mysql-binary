@@ -7,6 +7,12 @@ namespace Rcalicdan\MySQLBinaryProtocol\Frame\Command;
 use Rcalicdan\MySQLBinaryProtocol\Buffer\Writer\BufferPayloadWriterFactory;
 use Rcalicdan\MySQLBinaryProtocol\Constants\MysqlType;
 
+/**
+ * Builder for building bound parameters for COM_STMT_EXECUTE packets.
+ *
+ * This builder class is responsible for building bound parameters for COM_STMT_EXECUTE packets.
+ * It takes an array of parameters and builds the null bitmap, types, and values for the packet.
+ */
 class ParameterBuilder
 {
     private BufferPayloadWriterFactory $writerFactory;
@@ -16,6 +22,9 @@ class ParameterBuilder
         $this->writerFactory = $writerFactory ?? new BufferPayloadWriterFactory();
     }
 
+    /**
+     * @param array<int, mixed> $params
+     */
     public function build(array $params): BoundParams
     {
         if (empty($params)) {
@@ -25,7 +34,7 @@ class ParameterBuilder
         $numParams = \count($params);
         $nullBitmapBytes = (int) floor(($numParams + 7) / 8);
         $nullBitmap = array_fill(0, $nullBitmapBytes, 0);
-        
+
         $types = '';
         $valuesWriter = $this->writerFactory->create();
 
@@ -37,9 +46,10 @@ class ParameterBuilder
                 $byteIndex = (int) floor($i / 8);
                 $bitIndex = $i % 8;
                 $nullBitmap[$byteIndex] |= (1 << $bitIndex);
+
                 continue;
             }
-            
+
             if ($type === MysqlType::LONGLONG) {
                 $valuesWriter->writeUInt64($param);
             } elseif ($type === MysqlType::DOUBLE) {
@@ -69,7 +79,7 @@ class ParameterBuilder
         if (\is_float($param)) {
             return MysqlType::DOUBLE;
         }
-        
+
         return MysqlType::VAR_STRING;
     }
 }

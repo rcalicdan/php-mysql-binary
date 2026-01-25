@@ -6,7 +6,7 @@ namespace Rcalicdan\MySQLBinaryProtocol\Constants;
 
 /**
  * MySQL client and server capability flags.
- * 
+ *
  * These flags define the capabilities supported by the client and server
  * during the MySQL handshake process and determine available features.
  */

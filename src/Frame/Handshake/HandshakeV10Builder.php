@@ -6,7 +6,7 @@ namespace Rcalicdan\MySQLBinaryProtocol\Frame\Handshake;
 
 /**
  * Builder pattern implementation for creating HandshakeV10 frames.
- * 
+ *
  * This builder provides a fluent interface for constructing handshake frames
  * with various optional parameters while maintaining immutability.
  */
@@ -32,6 +32,7 @@ final class HandshakeV10Builder
         $builder = clone $this;
         $builder->serverVersion = $serverVersion;
         $builder->clientId = $clientId;
+
         return $builder;
     }
 
@@ -45,6 +46,7 @@ final class HandshakeV10Builder
     {
         $builder = clone $this;
         $builder->authData = $authData;
+
         return $builder;
     }
 
@@ -58,6 +60,7 @@ final class HandshakeV10Builder
     {
         $builder = clone $this;
         $builder->capabilities = $flags;
+
         return $builder;
     }
 
@@ -71,6 +74,7 @@ final class HandshakeV10Builder
     {
         $builder = clone $this;
         $builder->charset = $charsetId;
+
         return $builder;
     }
 
@@ -84,6 +88,7 @@ final class HandshakeV10Builder
     {
         $builder = clone $this;
         $builder->status = $status;
+
         return $builder;
     }
 
@@ -97,6 +102,7 @@ final class HandshakeV10Builder
     {
         $builder = clone $this;
         $builder->authPlugin = $authPlugin;
+
         return $builder;
     }
 

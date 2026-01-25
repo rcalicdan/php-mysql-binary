@@ -10,14 +10,14 @@ use Rcalicdan\MySQLBinaryProtocol\Packet\PayloadReader;
 
 /**
  * Parser for the ERR Packet.
- * 
+ *
  * Expects the payload to start with 0xFF.
  */
 class ErrPacketParser implements FrameParser
 {
     public function parse(PayloadReader $payload, int $length, int $sequenceNumber): Frame
     {
-        $payload->readFixedInteger(1); 
+        $payload->readFixedInteger(1);
 
         $errorCode = $payload->readFixedInteger(2);
 

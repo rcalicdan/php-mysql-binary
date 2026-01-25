@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Rcalicdan\MySQLBinaryProtocol\Buffer\ReadBuffer;
 use Rcalicdan\MySQLBinaryProtocol\Buffer\Reader\BufferPayloadReaderFactory;
 use Rcalicdan\MySQLBinaryProtocol\Exception\IncompleteBufferException;
@@ -16,6 +18,7 @@ function createPayloadReader(string $payload, int ...$packetLength): PayloadRead
     $buffer = new ReadBuffer();
     $buffer->append($payload);
     $packetLength = $packetLength ?: [strlen($payload)];
+
     return (new BufferPayloadReaderFactory())->createFromBuffer($buffer, $packetLength);
 }
 
@@ -105,8 +108,9 @@ test('reads null value from length encoded integer spec', function () {
 test('reports incorrect length encoded integer given first byte is out of bounds', function () {
     $payloadReader = createPayloadReader("\xff");
 
-    expect(fn() => $payloadReader->readLengthEncodedIntegerOrNull())
-        ->toThrow(InvalidBinaryDataException::class);
+    expect(fn () => $payloadReader->readLengthEncodedIntegerOrNull())
+        ->toThrow(InvalidBinaryDataException::class)
+    ;
 });
 
 test('reads fixed length string', function () {
@@ -171,8 +175,9 @@ test('reads multiple null terminated strings', function () {
 test('throws incomplete buffer exception when null character is not present', function () {
     $payloadReader = createPayloadReader('some string without null character');
 
-    expect(fn() => $payloadReader->readNullTerminatedString())
-        ->toThrow(IncompleteBufferException::class);
+    expect(fn () => $payloadReader->readNullTerminatedString())
+        ->toThrow(IncompleteBufferException::class)
+    ;
 });
 
 test('reads string till end of the buffer', function () {
@@ -186,7 +191,10 @@ test('reads string till end of the buffer', function () {
 test('reads multiple strings that represent complete packet', function () {
     $payloadReader = createPayloadReader(
         'packet1packet2packet3last packet',
-        7, 7, 7, 11
+        7,
+        7,
+        7,
+        11
     );
 
     $results = [
@@ -202,7 +210,8 @@ test('reads multiple strings that represent complete packet', function () {
 test('reads rest of packet string starting from current buffer position', function () {
     $payloadReader = createPayloadReader(
         'onerest of packetstring that should not be read',
-        17, 30
+        17,
+        30
     );
 
     $payloadReader->readFixedString(3);

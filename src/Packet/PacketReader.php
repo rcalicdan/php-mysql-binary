@@ -6,7 +6,7 @@ namespace Rcalicdan\MySQLBinaryProtocol\Packet;
 
 /**
  * Interface for reading MySQL protocol packets from a data stream.
- * 
+ *
  * Packet readers handle the low-level packet framing and provide
  * access to packet payloads for higher-level processing.
  */

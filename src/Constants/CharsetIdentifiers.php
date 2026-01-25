@@ -6,7 +6,7 @@ namespace Rcalicdan\MySQLBinaryProtocol\Constants;
 
 /**
  * MySQL character set identifiers.
- * 
+ *
  * These constants define the numeric identifiers for common
  * character sets used in MySQL protocol communication.
  */

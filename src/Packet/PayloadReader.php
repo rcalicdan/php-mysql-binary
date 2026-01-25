@@ -6,7 +6,7 @@ namespace Rcalicdan\MySQLBinaryProtocol\Packet;
 
 /**
  * Interface for reading various data types from MySQL protocol payloads.
- * 
+ *
  * This interface defines methods for reading different MySQL protocol
  * data types including integers, strings, and length-encoded values.
  */

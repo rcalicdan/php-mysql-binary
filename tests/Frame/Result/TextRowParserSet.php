@@ -1,17 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 use Rcalicdan\MySQLBinaryProtocol\Buffer\Writer\BufferPayloadWriter;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Result\TextRow;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Result\TextRowParser;
-use Rcalicdan\MySQLBinaryProtocol\Buffer\Reader\BufferPayloadReaderFactory;
-
-
 
 test('parses text row with mixed values', function () {
     $writer = new BufferPayloadWriter();
     $writer->writeLengthEncodedString('hello')
         ->writeLengthEncodedString('123')
-        ->writeLengthEncodedInteger(0xFB);
+        ->writeLengthEncodedInteger(0xFB)
+    ;
 
     $payload = $writer->toString();
     $reader = createRowReader($payload);
@@ -25,7 +25,8 @@ test('parses text row with mixed values', function () {
         ->and($row->values)->toHaveCount(3)
         ->and($row->values[0])->toBe('hello')
         ->and($row->values[1])->toBe('123')
-        ->and($row->values[2])->toBeNull();
+        ->and($row->values[2])->toBeNull()
+    ;
 });
 
 test('parses empty row', function () {

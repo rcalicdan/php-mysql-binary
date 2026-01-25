@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Rcalicdan\MySQLBinaryProtocol\Frame\Error\ErrPacket;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Error\ErrPacketParser;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Response\OkPacket;
@@ -21,9 +23,9 @@ test('parses OK packet correctly', function () {
         ->and($packet->statusFlags)->toBe(2)
         ->and($packet->warnings)->toBe(0)
         ->and($packet->info)->toBe('Success')
-        ->and($packet->sequenceNumber)->toBe(1);  
+        ->and($packet->sequenceNumber)->toBe(1)
+    ;
 });
-
 
 test('parses OK packet with large LENENC integers', function () {
     $payloadData = "\x00\xFC\xFB\x00\x00\x02\x00\x00\x00";
@@ -36,13 +38,13 @@ test('parses OK packet with large LENENC integers', function () {
 });
 
 test('parses StmtPrepareOk packet correctly', function () {
-    $payloadData = "\x00"          
-        . "\x01\x00\x00\x00"       
-        . "\x03\x00"              
-        . "\x02\x00"              
-        . "\x00"                   
-        . "\x05\x00";               
-    
+    $payloadData = "\x00"
+        . "\x01\x00\x00\x00"
+        . "\x03\x00"
+        . "\x02\x00"
+        . "\x00"
+        . "\x05\x00";
+
     $reader = createReader($payloadData);
 
     $parser = new StmtPrepareOkPacketParser();
@@ -54,7 +56,8 @@ test('parses StmtPrepareOk packet correctly', function () {
         ->and($packet->numColumns)->toBe(3)
         ->and($packet->numParams)->toBe(2)
         ->and($packet->warningCount)->toBe(5)
-        ->and($packet->sequenceNumber)->toBe(1);
+        ->and($packet->sequenceNumber)->toBe(1)
+    ;
 });
 
 test('parses StmtPrepareOk packet with zero parameters and columns', function () {
@@ -63,13 +66,15 @@ test('parses StmtPrepareOk packet with zero parameters and columns', function ()
 
     /** @var StmtPrepareOkPacket $packet */
     $packet = (new StmtPrepareOkPacketParser())
-        ->parse($reader, strlen($payloadData), 2);
+        ->parse($reader, strlen($payloadData), 2)
+    ;
 
     expect($packet->statementId)->toBe(10)
         ->and($packet->numColumns)->toBe(0)
         ->and($packet->numParams)->toBe(0)
         ->and($packet->warningCount)->toBe(0)
-        ->and($packet->sequenceNumber)->toBe(2);
+        ->and($packet->sequenceNumber)->toBe(2)
+    ;
 });
 
 test('parses ERR packet correctly', function () {
@@ -86,5 +91,6 @@ test('parses ERR packet correctly', function () {
         ->and($packet->sqlStateMarker)->toBe('#')
         ->and($packet->sqlState)->toBe('42000')
         ->and($packet->errorMessage)->toBe($errorMsg)
-        ->and($packet->sequenceNumber)->toBe(1);  
+        ->and($packet->sequenceNumber)->toBe(1)
+    ;
 });
