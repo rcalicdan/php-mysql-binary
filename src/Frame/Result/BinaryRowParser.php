@@ -78,6 +78,7 @@ class BinaryRowParser implements FrameParser
         if ($result === false) {
             throw new InvalidBinaryDataException('Failed to unpack float value');
         }
+
         return $result[1];
     }
 
@@ -87,6 +88,7 @@ class BinaryRowParser implements FrameParser
         if ($result === false) {
             throw new InvalidBinaryDataException('Failed to unpack double value');
         }
+
         return $result[1];
     }
 

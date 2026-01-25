@@ -15,17 +15,17 @@ class UncompressedPacketReader implements PacketReader
     private const int LENGTH = 0;
     private const int SEQUENCE = 1;
     private int $awaitedPacketLength = 0;
-    
+
     /**
      * @var array<int, array{0: int, 1: int}>
      */
     private array $packets = [];
-    
+
     /**
      * @var array<int, int>
      */
     private array $remainingPacketLength = [];
-    
+
     private BinaryIntegerReader $binaryIntegerReader;
     private ReadBuffer $readBuffer;
     private BufferPayloadReader $payloadReader;
@@ -95,10 +95,10 @@ class UncompressedPacketReader implements PacketReader
             substr($dataToParse, 0, 3),
             3
         );
-        
+
         // Cast to int since we know 3-byte integers won't overflow
         $this->awaitedPacketLength = (int) $packetLength;
-        
+
         $this->packets[] = [
             self::LENGTH => $this->awaitedPacketLength,
             self::SEQUENCE => (int) $this->binaryIntegerReader->readFixed($dataToParse[3], 1),

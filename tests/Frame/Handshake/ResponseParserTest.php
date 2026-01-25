@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Rcalicdan\MySQLBinaryProtocol\Frame\Error\ErrPacket;
-use Rcalicdan\MySQLBinaryProtocol\Frame\Error\ErrPacketParser;
+use Rcalicdan\MySQLBinaryProtocol\Frame\Response\ErrPacket;
+use Rcalicdan\MySQLBinaryProtocol\Frame\Response\ErrPacketParser;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Response\OkPacket;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Response\OkPacketParser;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Response\StmtPrepareOkPacket;

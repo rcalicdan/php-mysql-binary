@@ -104,6 +104,7 @@ final class HandshakeParser implements FrameParser
                 $authDataPart2Len = max(13, $authDataLen - 8);
             } else {
                 $authDataPart2 = $reader->readNullTerminatedString();
+
                 return $authData . $authDataPart2;
             }
 

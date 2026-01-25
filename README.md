@@ -109,7 +109,7 @@ $packet = $packetWriter->write($queryPayload, sequenceId: 0);
 ### 4. Parsing Response Packets
 ```php
 use Rcalicdan\MySQLBinaryProtocol\Frame\Response\OkPacketParser;
-use Rcalicdan\MySQLBinaryProtocol\Frame\Error\ErrPacketParser;
+use Rcalicdan\MySQLBinaryProtocol\Frame\Response\ErrPacketParser;
 
 // After receiving response from server
 $responseData = /* binary data from socket */;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Rcalicdan\MySQLBinaryProtocol\Frame\Error;
+namespace Rcalicdan\MySQLBinaryProtocol\Frame\Response;
 
 use Rcalicdan\MySQLBinaryProtocol\Frame\Frame;
 use Rcalicdan\MySQLBinaryProtocol\Frame\FrameParser;
