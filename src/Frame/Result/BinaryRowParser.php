@@ -64,12 +64,30 @@ class BinaryRowParser implements FrameParser
             MysqlType::SHORT, MysqlType::YEAR => $reader->readFixedInteger(2),
             MysqlType::LONG, MysqlType::INT24 => $reader->readFixedInteger(4),
             MysqlType::LONGLONG => $reader->readFixedInteger(8),
-            MysqlType::FLOAT => unpack('f', $reader->readFixedString(4))[1],
-            MysqlType::DOUBLE => unpack('d', $reader->readFixedString(8))[1],
+            MysqlType::FLOAT => $this->unpackFloat($reader->readFixedString(4)),
+            MysqlType::DOUBLE => $this->unpackDouble($reader->readFixedString(8)),
             MysqlType::TIMESTAMP, MysqlType::DATETIME, MysqlType::DATE => $this->parseDateTime($reader),
             MysqlType::TIME => $this->parseTime($reader),
             default => $reader->readLengthEncodedStringOrNull(),
         };
+    }
+
+    private function unpackFloat(string $data): float
+    {
+        $result = unpack('f', $data);
+        if ($result === false) {
+            throw new InvalidBinaryDataException('Failed to unpack float value');
+        }
+        return $result[1];
+    }
+
+    private function unpackDouble(string $data): float
+    {
+        $result = unpack('d', $data);
+        if ($result === false) {
+            throw new InvalidBinaryDataException('Failed to unpack double value');
+        }
+        return $result[1];
     }
 
     private function parseDateTime(PayloadReader $reader): ?string
@@ -85,7 +103,7 @@ class BinaryRowParser implements FrameParser
         $day = $reader->readFixedInteger(1);
 
         if ($length === 4) {
-            return sprintf('%04d-%02d-%02d', $year, $month, $day);
+            return \sprintf('%04d-%02d-%02d', $year, $month, $day);
         }
 
         $hour = $reader->readFixedInteger(1);
@@ -123,7 +141,7 @@ class BinaryRowParser implements FrameParser
 
         if ($length === 12) {
             $microseconds = $reader->readFixedInteger(4);
-            $timeStr .= sprintf('.%06d', $microseconds);
+            $timeStr .= \sprintf('.%06d', $microseconds);
         }
 
         return $timeStr;
