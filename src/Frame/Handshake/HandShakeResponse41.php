@@ -39,7 +39,7 @@ final class HandshakeResponse41
         if ($capabilities & CapabilityFlags::CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA) {
             $writer->writeLengthEncodedString($authResponse);
         } elseif ($capabilities & CapabilityFlags::CLIENT_SECURE_CONNECTION) {
-            $writer->writeUInt8(strlen($authResponse));
+            $writer->writeUInt8(\strlen($authResponse));
             $writer->writeString($authResponse);
         } else {
             $writer->writeNullTerminatedString($authResponse);
