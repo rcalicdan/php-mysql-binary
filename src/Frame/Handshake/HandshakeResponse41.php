@@ -9,11 +9,9 @@ use Rcalicdan\MySQLBinaryProtocol\Constants\CapabilityFlags;
 
 final class HandshakeResponse41
 {
-    private BufferPayloadWriterFactory $writerFactory;
-
-    public function __construct(?BufferPayloadWriterFactory $writerFactory = null)
-    {
-        $this->writerFactory = $writerFactory ?? new BufferPayloadWriterFactory();
+    public function __construct(
+        private readonly BufferPayloadWriterFactory $writerFactory = new BufferPayloadWriterFactory()
+    ) {
     }
 
     public function build(

@@ -49,4 +49,22 @@ class AuthScrambler
 
         return $scrambled;
     }
+
+    /**
+     * Scrambles password using RSA encryption for Caching SHA2 Password method.
+     */
+    public static function scrambleSha256Rsa(string $password, string $scramble, string $publicKeyPem): string
+    {
+        if (!extension_loaded('openssl')) {
+            throw new \RuntimeException('The openssl extension is required for caching_sha2_password.');
+        }
+
+        $message = ($password . "\0") ^ str_pad($scramble, \strlen($password) + 1, $scramble);
+
+        if (!openssl_public_encrypt($message, $encrypted, $publicKeyPem, OPENSSL_PKCS1_OAEP_PADDING)) {
+            throw new \RuntimeException('Failed to encrypt password with public key.');
+        }
+
+        return $encrypted;
+    }
 }

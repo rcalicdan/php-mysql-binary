@@ -61,3 +61,40 @@ function buildColumnPayload(
 
     return $writer->toString();
 }
+
+function generateTestRsaKeyPair(): array
+{
+    $tempDir = sys_get_temp_dir();
+    $configFile = $tempDir . '/openssl_test_' . uniqid() . '.cnf';
+
+    $opensslConfig = <<<CONFIG
+[ req ]
+default_bits = 2048
+distinguished_name = req_distinguished_name
+
+[ req_distinguished_name ]
+CONFIG;
+
+    file_put_contents($configFile, $opensslConfig);
+
+    $config = [
+        'private_key_bits' => 2048,
+        'private_key_type' => OPENSSL_KEYTYPE_RSA,
+        'config' => $configFile,
+    ];
+
+    $res = openssl_pkey_new($config);
+
+    @unlink($configFile);
+
+    if ($res === false) {
+        throw new \RuntimeException('Failed to generate RSA key pair: ' . openssl_error_string());
+    }
+
+    $publicKeyDetails = openssl_pkey_get_details($res);
+
+    return [
+        'resource' => $res,
+        'public_key_pem' => $publicKeyDetails['key'],
+    ];
+}
