@@ -100,7 +100,13 @@ final class HandshakeParser implements FrameParser
         int $authDataLen
     ): string {
         if ($capabilities & CapabilityFlags::CLIENT_SECURE_CONNECTION) {
-            $authDataPart2Len = max(13, $authDataLen - 8);
+            if ($authDataLen > 0) {
+                $authDataPart2Len = max(13, $authDataLen - 8);
+            } else {
+                $authDataPart2 = $reader->readNullTerminatedString();
+                return $authData . $authDataPart2;
+            }
+
             if ($authDataPart2Len > 0) {
                 $authData .= $reader->readFixedString($authDataPart2Len);
             }
