@@ -6,15 +6,9 @@ namespace Rcalicdan\MySQLBinaryProtocol\Frame\Response;
 
 use Rcalicdan\MySQLBinaryProtocol\Frame\Frame;
 use Rcalicdan\MySQLBinaryProtocol\Frame\FrameParser;
-use Rcalicdan\MySQLBinaryProtocol\Frame\Result\TextRowParser;
+use Rcalicdan\MySQLBinaryProtocol\Frame\Result\TextRow;
 use Rcalicdan\MySQLBinaryProtocol\Packet\PayloadReader;
 
-/**
- * Parser for EOF or Row packets.
- *
- * Determines if a packet is an EOF packet (0xFE with length < 9)
- * or a row packet, and parses accordingly.
- */
 class RowOrEofParser implements FrameParser
 {
     public function __construct(
@@ -33,8 +27,45 @@ class RowOrEofParser implements FrameParser
             return new EofPacket((int)$warnings, (int)$statusFlags, $sequenceNumber);
         }
 
-        $parser = new TextRowParser($this->columnCount);
+        $values = [];
+        
+        $firstValue = $this->readLengthEncodedStringFromByte($payload, (int)$firstByte);
+        $values[] = $firstValue;
 
-        return $parser->parse($payload, $length, $sequenceNumber);
+        for ($i = 1; $i < $this->columnCount; $i++) {
+            $values[] = $payload->readLengthEncodedStringOrNull();
+        }
+
+        return new TextRow($values);
+    }
+
+    private function readLengthEncodedStringFromByte(PayloadReader $payload, int $firstByte): ?string
+    {
+        if ($firstByte === 0xFB) {
+            return null;
+        }
+
+        if ($firstByte < 0xFB) {
+            return $payload->readFixedString($firstByte);
+        }
+
+        if ($firstByte === 0xFC) {
+            $length = $payload->readFixedInteger(2);
+            return $payload->readFixedString((int)$length);
+        }
+
+        if ($firstByte === 0xFD) {
+            $length = $payload->readFixedInteger(3);
+            return $payload->readFixedString((int)$length);
+        }
+
+        if ($firstByte === 0xFE) {
+            $length = $payload->readFixedInteger(8);
+            return $payload->readFixedString((int)$length);
+        }
+
+        throw new \RuntimeException(
+            \sprintf('Invalid length-encoded string marker: 0x%02X', $firstByte)
+        );
     }
 }
