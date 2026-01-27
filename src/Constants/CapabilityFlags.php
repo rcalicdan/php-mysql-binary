@@ -6,9 +6,6 @@ namespace Rcalicdan\MySQLBinaryProtocol\Constants;
 
 /**
  * MySQL client and server capability flags.
- *
- * These flags define the capabilities supported by the client and server
- * during the MySQL handshake process and determine available features.
  */
 final class CapabilityFlags
 {
@@ -19,7 +16,7 @@ final class CapabilityFlags
     public const int CLIENT_NO_SCHEMA = 0x10;
     public const int CLIENT_COMPRESS = 0x20;
     public const int CLIENT_ODBC = 0x40;
-    public const int CLIENT_LOCAL_FILES = 0x80;
+    public const int CLIENT_LOCAL_FILES = 0x80; 
     public const int CLIENT_IGNORE_SPACE = 0x0100;
     public const int CLIENT_PROTOCOL_41 = 0x0200;
     public const int CLIENT_INTERACTIVE = 0x0400;
