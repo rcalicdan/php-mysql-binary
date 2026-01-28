@@ -13,21 +13,23 @@ use Rcalicdan\MySQLBinaryProtocol\Exception\IncompleteBufferException;
 class UncompressedPacketReader implements PacketReader
 {
     private const int LENGTH = 0;
+
     private const int SEQUENCE = 1;
+
     private int $awaitedPacketLength = 0;
 
-    /**
-     * @var array<int, array{0: int, 1: int}>
-     */
+    private string $partialHeader = '';
+
+    /** @var array<int, array{0: int, 1: int}> */
     private array $packets = [];
 
-    /**
-     * @var array<int, int>
-     */
+    /** @var array<int, int> */
     private array $remainingPacketLength = [];
 
     private BinaryIntegerReader $binaryIntegerReader;
+
     private ReadBuffer $readBuffer;
+
     private BufferPayloadReader $payloadReader;
 
     public function __construct(
@@ -45,6 +47,11 @@ class UncompressedPacketReader implements PacketReader
 
     public function append(string $data): void
     {
+        if ($this->partialHeader !== '') {
+            $data = $this->partialHeader . $data;
+            $this->partialHeader = '';
+        }
+
         do {
             $data = $this->registerPacket($data);
         } while ($data !== '');
@@ -77,17 +84,16 @@ class UncompressedPacketReader implements PacketReader
 
     private function registerPacket(string $dataToParse): string
     {
-        if ($this->awaitedPacketLength) {
-            $trimLength = min(strlen($dataToParse), $this->awaitedPacketLength);
+        if ($this->awaitedPacketLength > 0) {
+            $trimLength = min(\strlen($dataToParse), $this->awaitedPacketLength);
             $this->readBuffer->append(substr($dataToParse, 0, $trimLength));
             $this->awaitedPacketLength -= $trimLength;
 
             return substr($dataToParse, $trimLength);
         }
 
-        if (strlen($dataToParse) < 4) {
-            $this->readBuffer->append($dataToParse);
-
+        if (\strlen($dataToParse) < 4) {
+            $this->partialHeader = $dataToParse;
             return '';
         }
 
@@ -96,9 +102,8 @@ class UncompressedPacketReader implements PacketReader
             3
         );
 
-        // Cast to int since we know 3-byte integers won't overflow
         $this->awaitedPacketLength = (int) $packetLength;
-
+        
         $this->packets[] = [
             self::LENGTH => $this->awaitedPacketLength,
             self::SEQUENCE => (int) $this->binaryIntegerReader->readFixed($dataToParse[3], 1),
@@ -107,7 +112,8 @@ class UncompressedPacketReader implements PacketReader
         $this->remainingPacketLength[] = $this->awaitedPacketLength;
 
         $payloadData = substr($dataToParse, 4);
-        $trimLength = min(strlen($payloadData), $this->awaitedPacketLength);
+        $trimLength = min(\strlen($payloadData), $this->awaitedPacketLength);
+        
         if ($trimLength > 0) {
             $this->readBuffer->append(substr($payloadData, 0, $trimLength));
         }
