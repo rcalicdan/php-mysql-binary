@@ -55,8 +55,8 @@ class ReadBuffer
     public function read(int $length): string
     {
         if (! $this->isReadable($length)) {
-            $this->currentBufferOffset = $this->readBufferOffset;
-
+            // The logic controlling the buffer (UncompressedPacketReader) must call reset() explicitly
+            // to ensure atomic packet processing.
             throw new IncompleteBufferException();
         }
 
@@ -94,6 +94,16 @@ class ReadBuffer
         }
 
         return $bytesRead;
+    }
+
+    /**
+     * Resets the current read position to the last flushed position.
+     * This effectively rolls back any reads done since the last flush.
+     * Crucial for retrying incomplete packet reads.
+     */
+    public function reset(): void
+    {
+        $this->currentBufferOffset = $this->readBufferOffset;
     }
 
     /**

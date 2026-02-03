@@ -74,15 +74,17 @@ test('is readable when exact amount of bytes available to read', function () {
     expect($this->readBuffer->isReadable(7))->toBeTrue();
 });
 
-test('allows to read data again if previous session was not read completely', function () {
+test('reset allows to read data again after incomplete read', function () {
     $this->readBuffer->append('Data in buffer');
+    $this->readBuffer->flush();
+
     $this->readBuffer->read(4);
     $this->readBuffer->read(4);
 
-    try {
-        $this->readBuffer->read(7);
-    } catch (IncompleteBufferException $exception) {
-    }
+    expect(fn() => $this->readBuffer->read(7))
+        ->toThrow(IncompleteBufferException::class);
+
+    $this->readBuffer->reset();
 
     expect($this->readBuffer->read(8))->toBe('Data in ');
 });

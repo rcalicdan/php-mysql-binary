@@ -142,5 +142,6 @@ test('parses pre-4.1 legacy handshake', function () {
         ->and($handshake->authData)->toBe('scrambleextradata') // null terminator stripped
         ->and($handshake->charset)->toBe(0)
         ->and($handshake->status)->toBe(0)
-        ->and($handshake->authPlugin)->toBe('mysql_native_password');
+        ->and($handshake->authPlugin)->toBe('mysql_native_password')
+    ;
 });

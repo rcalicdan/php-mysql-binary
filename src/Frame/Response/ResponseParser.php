@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Rcalicdan\MySQLBinaryProtocol\Frame\Response;
 
-use Rcalicdan\MySQLBinaryProtocol\Frame\Response\ErrPacket;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Frame;
 use Rcalicdan\MySQLBinaryProtocol\Packet\PayloadReader;
 

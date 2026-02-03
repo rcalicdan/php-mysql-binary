@@ -88,7 +88,7 @@ CONFIG;
     @unlink($configFile);
 
     if ($res === false) {
-        throw new \RuntimeException('Failed to generate RSA key pair: ' . openssl_error_string());
+        throw new RuntimeException('Failed to generate RSA key pair: ' . openssl_error_string());
     }
 
     $publicKeyDetails = openssl_pkey_get_details($res);

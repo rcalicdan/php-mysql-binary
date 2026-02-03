@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Rcalicdan\MySQLBinaryProtocol\Frame\Response\ResponseParser;
-use Rcalicdan\MySQLBinaryProtocol\Frame\Response\OkPacket;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Response\ErrPacket;
+use Rcalicdan\MySQLBinaryProtocol\Frame\Response\OkPacket;
+use Rcalicdan\MySQLBinaryProtocol\Frame\Response\ResponseParser;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Response\ResultSetHeader;
 
 test('ResponseParser routes to OK packet when first byte is 0x00', function () {
@@ -22,7 +22,8 @@ test('ResponseParser routes to OK packet when first byte is 0x00', function () {
         ->and($packet->statusFlags)->toBe(2)
         ->and($packet->warnings)->toBe(0)
         ->and($packet->info)->toBe('Success')
-        ->and($packet->sequenceNumber)->toBe(1);
+        ->and($packet->sequenceNumber)->toBe(1)
+    ;
 });
 
 test('ResponseParser routes to ERR packet when first byte is 0xFF', function () {
@@ -40,21 +41,23 @@ test('ResponseParser routes to ERR packet when first byte is 0xFF', function () 
         ->and($packet->sqlStateMarker)->toBe('#')
         ->and($packet->sqlState)->toBe('42000')
         ->and($packet->errorMessage)->toBe($errorMsg)
-        ->and($packet->sequenceNumber)->toBe(2);
+        ->and($packet->sequenceNumber)->toBe(2)
+    ;
 });
 
 test('ResponseParser routes to ResultSetHeader for column count < 251', function () {
-    $payloadData = "\x03"; 
+    $payloadData = "\x03";
     $reader = createReader($payloadData);
 
     $parser = new ResponseParser();
-    
+
     /** @var ResultSetHeader $packet */
     $packet = $parser->parseResponse($reader, strlen($payloadData), 1);
 
     expect($packet)->toBeInstanceOf(ResultSetHeader::class)
         ->and($packet->columnCount)->toBe(3)
-        ->and($packet->sequenceNumber)->toBe(1);
+        ->and($packet->sequenceNumber)->toBe(1)
+    ;
 });
 
 test('ResponseParser parses ResultSetHeader with single column', function () {
@@ -67,7 +70,8 @@ test('ResponseParser parses ResultSetHeader with single column', function () {
     /** @var ResultSetHeader $packet */
     expect($packet)->toBeInstanceOf(ResultSetHeader::class)
         ->and($packet->columnCount)->toBe(1)
-        ->and($packet->sequenceNumber)->toBe(3);
+        ->and($packet->sequenceNumber)->toBe(3)
+    ;
 });
 
 test('ResponseParser parses ResultSetHeader with 2-byte length encoding (0xFC)', function () {
@@ -80,11 +84,12 @@ test('ResponseParser parses ResultSetHeader with 2-byte length encoding (0xFC)',
     $packet = $parser->parseResponse($reader, strlen($payloadData), 1);
 
     expect($packet)->toBeInstanceOf(ResultSetHeader::class)
-        ->and($packet->columnCount)->toBe(251);
+        ->and($packet->columnCount)->toBe(251)
+    ;
 });
 
 test('ResponseParser parses ResultSetHeader with 3-byte length encoding (0xFD)', function () {
-    $payloadData = "\xFD\x00\x00\x01"; 
+    $payloadData = "\xFD\x00\x00\x01";
     $reader = createReader($payloadData);
 
     $parser = new ResponseParser();
@@ -93,11 +98,12 @@ test('ResponseParser parses ResultSetHeader with 3-byte length encoding (0xFD)',
     $packet = $parser->parseResponse($reader, strlen($payloadData), 1);
 
     expect($packet)->toBeInstanceOf(ResultSetHeader::class)
-        ->and($packet->columnCount)->toBe(65536);
+        ->and($packet->columnCount)->toBe(65536)
+    ;
 });
 
 test('ResponseParser parses ResultSetHeader with 8-byte length encoding (0xFE)', function () {
-    $payloadData = "\xFE\x00\x00\x00\x01\x00\x00\x00\x00"; 
+    $payloadData = "\xFE\x00\x00\x00\x01\x00\x00\x00\x00";
     $reader = createReader($payloadData);
 
     $parser = new ResponseParser();
@@ -105,7 +111,8 @@ test('ResponseParser parses ResultSetHeader with 8-byte length encoding (0xFE)',
     $packet = $parser->parseResponse($reader, strlen($payloadData), 1);
 
     expect($packet)->toBeInstanceOf(ResultSetHeader::class)
-        ->and($packet->columnCount)->toBe(16777216);
+        ->and($packet->columnCount)->toBe(16777216)
+    ;
 });
 
 test('ResponseParser throws exception for NULL marker (0xFB) in result set header', function () {
@@ -113,9 +120,10 @@ test('ResponseParser throws exception for NULL marker (0xFB) in result set heade
     $reader = createReader($payloadData);
 
     $parser = new ResponseParser();
-    
-    expect(fn() => $parser->parseResponse($reader, strlen($payloadData), 1))
-        ->toThrow(\RuntimeException::class, 'Unexpected NULL (0xFB) in result set header');
+
+    expect(fn () => $parser->parseResponse($reader, strlen($payloadData), 1))
+        ->toThrow(RuntimeException::class, 'Unexpected NULL (0xFB) in result set header')
+    ;
 });
 
 test('ResponseParser throws exception for EOF packet (0xFE) with length < 9', function () {
@@ -123,9 +131,10 @@ test('ResponseParser throws exception for EOF packet (0xFE) with length < 9', fu
     $reader = createReader($payloadData);
 
     $parser = new ResponseParser();
-    
-    expect(fn() => $parser->parseResponse($reader, strlen($payloadData), 1))
-        ->toThrow(\RuntimeException::class, 'Unexpected EOF packet when expecting result set header');
+
+    expect(fn () => $parser->parseResponse($reader, strlen($payloadData), 1))
+        ->toThrow(RuntimeException::class, 'Unexpected EOF packet when expecting result set header')
+    ;
 });
 
 test('ResponseParser parses OK packet with empty info string', function () {

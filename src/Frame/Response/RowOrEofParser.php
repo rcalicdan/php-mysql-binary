@@ -27,8 +27,23 @@ class RowOrEofParser implements FrameParser
             return new EofPacket((int)$warnings, (int)$statusFlags, $sequenceNumber);
         }
 
+        if ($firstByte === 0xFF) {
+            $errorCode = $payload->readFixedInteger(2);
+            $sqlStateMarker = $payload->readFixedString(1);
+            $sqlState = $payload->readFixedString(5);
+            $errorMessage = $payload->readRestOfPacketString();
+
+            return new ErrPacket(
+                (int)$errorCode,
+                $sqlStateMarker,
+                $sqlState,
+                $errorMessage,
+                $sequenceNumber
+            );
+        }
+
         $values = [];
-        
+
         $firstValue = $this->readLengthEncodedStringFromByte($payload, (int)$firstByte);
         $values[] = $firstValue;
 
@@ -51,16 +66,19 @@ class RowOrEofParser implements FrameParser
 
         if ($firstByte === 0xFC) {
             $length = $payload->readFixedInteger(2);
+
             return $payload->readFixedString((int)$length);
         }
 
         if ($firstByte === 0xFD) {
             $length = $payload->readFixedInteger(3);
+
             return $payload->readFixedString((int)$length);
         }
 
         if ($firstByte === 0xFE) {
             $length = $payload->readFixedInteger(8);
+
             return $payload->readFixedString((int)$length);
         }
 

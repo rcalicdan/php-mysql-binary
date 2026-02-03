@@ -76,6 +76,8 @@ class UncompressedPacketReader implements PacketReader
             );
             $this->advancePacketLength($this->readBuffer->flush());
         } catch (IncompleteBufferException $exception) {
+            $this->readBuffer->reset();
+
             return false;
         }
 
@@ -94,6 +96,7 @@ class UncompressedPacketReader implements PacketReader
 
         if (\strlen($dataToParse) < 4) {
             $this->partialHeader = $dataToParse;
+
             return '';
         }
 
@@ -103,7 +106,7 @@ class UncompressedPacketReader implements PacketReader
         );
 
         $this->awaitedPacketLength = (int) $packetLength;
-        
+
         $this->packets[] = [
             self::LENGTH => $this->awaitedPacketLength,
             self::SEQUENCE => (int) $this->binaryIntegerReader->readFixed($dataToParse[3], 1),
@@ -113,7 +116,7 @@ class UncompressedPacketReader implements PacketReader
 
         $payloadData = substr($dataToParse, 4);
         $trimLength = min(\strlen($payloadData), $this->awaitedPacketLength);
-        
+
         if ($trimLength > 0) {
             $this->readBuffer->append(substr($payloadData, 0, $trimLength));
         }

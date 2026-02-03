@@ -56,9 +56,10 @@ test('scrambles using RSA encryption for caching_sha2_password', function () {
 });
 
 test('throws exception when openssl extension is not loaded', function () {
-    if (!extension_loaded('openssl')) {
-        expect(fn() => AuthScrambler::scrambleSha256Rsa('password', 'nonce', 'fake_key'))
-            ->toThrow(\RuntimeException::class, 'The openssl extension is required');
+    if (! extension_loaded('openssl')) {
+        expect(fn () => AuthScrambler::scrambleSha256Rsa('password', 'nonce', 'fake_key'))
+            ->toThrow(RuntimeException::class, 'The openssl extension is required')
+        ;
     }
 })->skip(extension_loaded('openssl'), 'OpenSSL extension is loaded, cannot test missing extension');
 
@@ -66,19 +67,21 @@ test('throws exception on invalid public key', function () {
     $password = 'test_password';
     $scramble = str_repeat('a', 20);
     $invalidKey = 'not a valid public key';
-    
+
     $suppressWarnings = function (callable $callback) {
-        set_error_handler(fn() => true);
+        set_error_handler(fn () => true);
+
         try {
             return $callback();
         } finally {
             restore_error_handler();
         }
     };
-    
+
     $suppressWarnings(function () use ($password, $scramble, $invalidKey) {
-        expect(fn() => AuthScrambler::scrambleSha256Rsa($password, $scramble, $invalidKey))
-            ->toThrow(\RuntimeException::class, 'Failed to encrypt password with public key');
+        expect(fn () => AuthScrambler::scrambleSha256Rsa($password, $scramble, $invalidKey))
+            ->toThrow(RuntimeException::class, 'Failed to encrypt password with public key')
+        ;
     });
 });
 

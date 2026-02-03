@@ -174,4 +174,5 @@ test('reads 8 bytes using custom hex conversion')
 
         return $reader->readFixed("\x00\x00\x00\x00\x00\x00\x00\x01", 8);
     })
-    ->toBe(72057594037927936); // 2^56
+    ->toBe(72057594037927936) // 2^56
+;
