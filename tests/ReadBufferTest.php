@@ -81,8 +81,9 @@ test('reset allows to read data again after incomplete read', function () {
     $this->readBuffer->read(4);
     $this->readBuffer->read(4);
 
-    expect(fn() => $this->readBuffer->read(7))
-        ->toThrow(IncompleteBufferException::class);
+    expect(fn () => $this->readBuffer->read(7))
+        ->toThrow(IncompleteBufferException::class)
+    ;
 
     $this->readBuffer->reset();
 

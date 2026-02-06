@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Rcalicdan\MySQLBinaryProtocol\Frame\Handshake;
 
+use Rcalicdan\MySQLBinaryProtocol\Constants\AuthPacketType;
 use Rcalicdan\MySQLBinaryProtocol\Constants\CapabilityFlags;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Frame;
 use Rcalicdan\MySQLBinaryProtocol\Frame\FrameParser;
+use Rcalicdan\MySQLBinaryProtocol\Frame\Response\ErrPacket;
 use Rcalicdan\MySQLBinaryProtocol\Packet\PayloadReader;
 
 /**
@@ -16,15 +18,36 @@ final class HandshakeParser implements FrameParser
 {
     public function parse(PayloadReader $reader, int $length, int $sequenceNumber): Frame
     {
-        $reader->readFixedInteger(1);
+        $firstByte = $reader->readFixedInteger(1);
+
+        if ($firstByte === AuthPacketType::ERR) {
+            $errorCode = (int) $reader->readFixedInteger(2);
+
+            $remaining = $reader->readRestOfPacketString();
+
+            if (\strlen($remaining) >= 6 && $remaining[0] === '#') {
+                $sqlStateMarker = '#';
+                $sqlState = substr($remaining, 1, 5);
+                $errorMessage = substr($remaining, 6);
+            } else {
+                $sqlStateMarker = '';
+                $sqlState = 'HY000';
+                $errorMessage = $remaining;
+            }
+
+            return new ErrPacket(
+                $errorCode,
+                $sqlStateMarker,
+                $sqlState,
+                $errorMessage,
+                $sequenceNumber
+            );
+        }
 
         $serverVersion = $reader->readNullTerminatedString();
         $connectionId = (int) $reader->readFixedInteger(4);
-
         $authData = $reader->readFixedString(8);
-
         $reader->readFixedString(1);
-
         $capabilities = (int) $reader->readFixedInteger(2);
 
         $authPlugin = 'mysql_native_password';
