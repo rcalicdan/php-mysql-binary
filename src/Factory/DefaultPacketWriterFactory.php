@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Rcalicdan\MySQLBinaryProtocol\Factory;
 
 use Rcalicdan\MySQLBinaryProtocol\Buffer\Writer\BinaryWriter;
+use Rcalicdan\MySQLBinaryProtocol\Packet\CompressedPacketWriter;
 use Rcalicdan\MySQLBinaryProtocol\Packet\UncompressedPacketWriter;
 
 class DefaultPacketWriterFactory
@@ -12,6 +13,13 @@ class DefaultPacketWriterFactory
     public function createWithDefaultSettings(): UncompressedPacketWriter
     {
         return new UncompressedPacketWriter(
+            new BinaryWriter()
+        );
+    }
+
+    public function createCompressed(): CompressedPacketWriter
+    {
+        return new CompressedPacketWriter(
             new BinaryWriter()
         );
     }

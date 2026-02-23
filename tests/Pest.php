@@ -2,14 +2,17 @@
 
 declare(strict_types=1);
 
+use Rcalicdan\MySQLBinaryProtocol\Buffer\ReadBuffer;
 use Rcalicdan\MySQLBinaryProtocol\Buffer\Reader\BinaryIntegerReader;
 use Rcalicdan\MySQLBinaryProtocol\Buffer\Reader\BufferPayloadReaderFactory;
 use Rcalicdan\MySQLBinaryProtocol\Buffer\Writer\BufferPayloadWriter;
 use Rcalicdan\MySQLBinaryProtocol\Constants\ColumnFlags;
 use Rcalicdan\MySQLBinaryProtocol\Constants\MysqlType;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Response\BinaryRowOrEofParser;
-use Rcalicdan\MySQLBinaryProtocol\Frame\Result\ColumnDefinition;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Result\BinaryRow;
+use Rcalicdan\MySQLBinaryProtocol\Frame\Result\ColumnDefinition;
+use Rcalicdan\MySQLBinaryProtocol\Packet\CompressedPacketReader;
+use Rcalicdan\MySQLBinaryProtocol\Packet\UncompressedPacketReader;
 
 uses(PHPUnit\Framework\TestCase::class)->in('.');
 
@@ -60,8 +63,7 @@ function buildColumnPayload(
         ->writeUInt8($type)
         ->writeUInt16(0)
         ->writeUInt8(0)
-        ->writeUInt16(0)
-    ;
+        ->writeUInt16(0);
 
     return $writer->toString();
 }
@@ -154,4 +156,52 @@ function parseLongLong(array $columns, string $payload): mixed
     $row = (new BinaryRowOrEofParser($columns))->parse($reader, strlen($payload), 1);
 
     return $row->values[0];
+}
+
+function buildRawPacket(string $payload, int $sequence = 0): string
+{
+    return substr(pack('V', strlen($payload)), 0, 3) . chr($sequence) . $payload;
+}
+
+function makePacketReader(): UncompressedPacketReader
+{
+    return new UncompressedPacketReader(
+        new BinaryIntegerReader(),
+        new ReadBuffer(),
+        new BufferPayloadReaderFactory()
+    );
+}
+
+function makeCompressedPacketReader(): CompressedPacketReader
+{
+    return new CompressedPacketReader(
+        new BinaryIntegerReader(),
+        new ReadBuffer(),
+        makePacketReader()
+    );
+}
+
+/**
+ * Builds a raw compressed protocol packet (7-byte header):
+ *   3-byte LE compressed payload length
+ *   1-byte sequence ID
+ *   3-byte LE uncompressed length (0 = data is NOT compressed)
+ *
+ * The $innerData should already be a valid inner uncompressed packet
+ * (i.e. built with buildRawPacket) before passing here.
+ */
+function buildCompressedProtocolPacket(string $innerData, int $sequence = 0, bool $compress = false): string
+{
+    if ($compress) {
+        $compressedData = gzcompress($innerData, 6);
+        $uncompressedLength = strlen($innerData);
+    } else {
+        $compressedData = $innerData;
+        $uncompressedLength = 0; 
+    }
+
+    return substr(pack('V', strlen($compressedData)), 0, 3)
+        . chr($sequence)
+        . substr(pack('V', $uncompressedLength), 0, 3)
+        . $compressedData;
 }

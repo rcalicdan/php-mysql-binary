@@ -26,4 +26,13 @@ interface PacketReader
      * @return bool True if a complete packet was read, false if more data is needed
      */
     public function readPayload(callable $reader): bool;
+
+    /**
+     * Checks if at least one complete packet is available to be read from the buffer.
+     *
+     * This is used to control the read loop in the connection manager.
+     *
+     * @return bool True if a packet is ready, false otherwise.
+     */
+    public function hasPacket(): bool;
 }
