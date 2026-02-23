@@ -60,7 +60,7 @@ class ParameterBuilder
         }
 
         return new BoundParams(
-            implode('', array_map('chr', $nullBitmap)),
+            implode('', array_map(fn(int $byte): string => \chr($byte & 0xFF), $nullBitmap)),
             $types,
             $valuesWriter->toString()
         );

@@ -44,7 +44,7 @@ class AuthScrambler
         $scrambled = '';
         $length = \strlen($hash1);
         for ($i = 0; $i < $length; $i++) {
-            $scrambled .= \chr(\ord($hash1[$i]) ^ \ord($hash3[$i]));
+            $scrambled .= \chr((\ord($hash1[$i]) ^ \ord($hash3[$i])) & 0xFF);
         }
 
         return $scrambled;
