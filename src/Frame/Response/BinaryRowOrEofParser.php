@@ -32,7 +32,7 @@ class BinaryRowOrEofParser implements FrameParser
             $warnings = $payload->readFixedInteger(2);
             $statusFlags = $payload->readFixedInteger(2);
 
-            return new EofPacket((int)$warnings, (int)$statusFlags, $sequenceNumber);
+            return new EofPacket((int) $warnings, (int) $statusFlags, $sequenceNumber);
         }
 
         if ($firstByte === PacketType::ERR) {
@@ -42,7 +42,7 @@ class BinaryRowOrEofParser implements FrameParser
             $errorMessage = $payload->readRestOfPacketString();
 
             return new ErrPacket(
-                (int)$errorCode,
+                (int) $errorCode,
                 $sqlStateMarker,
                 $sqlState,
                 $errorMessage,
@@ -122,12 +122,12 @@ class BinaryRowOrEofParser implements FrameParser
             \in_array($column->type, [MysqlType::TINY, MysqlType::SHORT, MysqlType::INT24, MysqlType::LONG], true)
             && ($column->flags & ColumnFlags::UNSIGNED_FLAG) === 0
         ) {
-            $val = is_numeric($val) ? (int)$val : 0;
+            $val = is_numeric($val) ? (int) $val : 0;
             $val = match ($column->type) {
-                MysqlType::TINY => $val >= DataTypeBounds::TINYINT_SIGN_BIT ? $val - DataTypeBounds::TINYINT_RANGE : $val,
-                MysqlType::SHORT => $val >= DataTypeBounds::SMALLINT_SIGN_BIT ? $val - DataTypeBounds::SMALLINT_RANGE : $val,
+                MysqlType::TINY  => $val >= DataTypeBounds::TINYINT_SIGN_BIT   ? $val - DataTypeBounds::TINYINT_RANGE   : $val,
+                MysqlType::SHORT => $val >= DataTypeBounds::SMALLINT_SIGN_BIT  ? $val - DataTypeBounds::SMALLINT_RANGE  : $val,
                 MysqlType::INT24 => $val >= DataTypeBounds::MEDIUMINT_SIGN_BIT ? $val - DataTypeBounds::MEDIUMINT_RANGE : $val,
-                MysqlType::LONG => $val >= DataTypeBounds::INT_SIGN_BIT ? $val - DataTypeBounds::INT_RANGE : $val,
+                MysqlType::LONG  => $val >= DataTypeBounds::INT_SIGN_BIT       ? $val - DataTypeBounds::INT_RANGE       : $val,
             };
         }
 
@@ -137,24 +137,103 @@ class BinaryRowOrEofParser implements FrameParser
     private function readLongLong(PayloadReader $reader, ColumnDefinition $column): int|string
     {
         $bytes = $reader->readFixedString(8);
-
-        if (($column->flags & ColumnFlags::UNSIGNED_FLAG) !== 0) {
-            $val = hexdec(bin2hex(strrev($bytes)));
-            if (\is_float($val)) {
-                return number_format($val, 0, '', '');
-            }
-            return $val;
-        }
-
         $parts = unpack('V2', $bytes);
+
         if ($parts === false) {
             $parts = [1 => 0, 2 => 0];
         }
 
-        $upper = isset($parts[2]) && is_numeric($parts[2]) ? (int)$parts[2] : 0;
-        $lower = isset($parts[1]) && is_numeric($parts[1]) ? (int)$parts[1] : 0;
+        $lower = isset($parts[1]) ? ($parts[1] & 0xFFFFFFFF) : 0;
+        $upper = isset($parts[2]) ? ($parts[2] & 0xFFFFFFFF) : 0;
 
-        return ($upper << 32) | $lower;
+        if (($column->flags & ColumnFlags::UNSIGNED_FLAG) !== 0) {
+            return $this->reconstructUnsigned64($lower, $upper);
+        }
+
+        return $this->reconstructSigned64($lower, $upper);
+    }
+
+    /**
+     * Reconstructs an unsigned 64-bit integer from two 32-bit halves.
+     *
+     * With BCMath: exact for all values up to 2^64 - 1.
+     * Without BCMath: exact when the value fits in a native PHP int (≤ PHP_INT_MAX),
+     * float-approximated (may lose precision) for values above PHP_INT_MAX.
+     */
+    private function reconstructUnsigned64(int $lower, int $upper): int|string
+    {
+        if ($upper === 0) {
+            return $lower;
+        }
+
+        if (\extension_loaded('bcmath')) {
+            $value = bcadd(bcmul((string) $upper, '4294967296'), (string) $lower);
+
+            if (bccomp($value, (string) PHP_INT_MAX) <= 0) {
+                return (int) $value;
+            }
+
+            return $value;
+        }
+
+        // BCMath unavailable: use float, precision may be lost above PHP_INT_MAX
+        $value = ($upper * 4294967296.0) + $lower;
+
+        if ($value > PHP_INT_MAX) {
+            return number_format($value, 0, '', '');
+        }
+
+        return (int) $value;
+    }
+
+    /**
+     * Reconstructs a signed 64-bit integer from two 32-bit halves.
+     *
+     * With BCMath: exact for all values in the range [-2^63, 2^63 - 1].
+     * Without BCMath: exact when the value fits in a native PHP int,
+     * float-approximated (may lose precision) for extreme values near ±2^63.
+     */
+    private function reconstructSigned64(int $lower, int $upper): int|string
+    {
+        $isNegative = ($upper & 0x80000000) !== 0;
+
+        if (!$isNegative) {
+            if ($upper === 0) {
+                return $lower;
+            }
+
+            if (\extension_loaded('bcmath')) {
+                $value = bcadd(bcmul((string) $upper, '4294967296'), (string) $lower);
+
+                if (bccomp($value, (string) PHP_INT_MAX) <= 0) {
+                    return (int) $value;
+                }
+
+                return $value;
+            }
+
+            $value = ($upper * 4294967296.0) + $lower;
+
+            return $value <= PHP_INT_MAX ? (int) $value : number_format($value, 0, '', '');
+        }
+
+        if (\extension_loaded('bcmath')) {
+            $raw = bcadd(bcmul((string) $upper, '4294967296'), (string) $lower);
+            // Subtract 2^64 to convert the raw unsigned representation to its true negative value
+            $value = bcsub($raw, '18446744073709551616');
+
+            if (bccomp($value, (string) PHP_INT_MIN) >= 0) {
+                return (int) $value;
+            }
+
+            return $value;
+        }
+
+        // BCMath unavailable: two's complement via float, may lose precision near PHP_INT_MIN
+        $raw = ($upper * 4294967296.0) + $lower;
+        $value = $raw - 18446744073709551616.0;
+
+        return $value >= PHP_INT_MIN ? (int) $value : number_format($value, 0, '', '');
     }
 
     private function unpackFloat(string $data): float
@@ -163,6 +242,7 @@ class BinaryRowOrEofParser implements FrameParser
         if ($result === false) {
             throw new InvalidBinaryDataException('Failed to unpack float value');
         }
+
         return $result[1];
     }
 
@@ -172,10 +252,11 @@ class BinaryRowOrEofParser implements FrameParser
         if ($result === false) {
             throw new InvalidBinaryDataException('Failed to unpack double value');
         }
+
         return $result[1];
     }
 
-    private function parseDateTime(PayloadReader $reader, int $type): ?string
+    private function parseDateTime(PayloadReader $reader, int $type): string
     {
         $length = $reader->readFixedInteger(1);
 
@@ -183,12 +264,13 @@ class BinaryRowOrEofParser implements FrameParser
             if ($type === MysqlType::DATE) {
                 return '0000-00-00';
             }
+
             return '0000-00-00 00:00:00';
         }
 
-        $year = $reader->readFixedInteger(2);
+        $year  = $reader->readFixedInteger(2);
         $month = $reader->readFixedInteger(1);
-        $day = $reader->readFixedInteger(1);
+        $day   = $reader->readFixedInteger(1);
 
         $dateStr = \sprintf('%04d-%02d-%02d', $year, $month, $day);
 
@@ -197,7 +279,7 @@ class BinaryRowOrEofParser implements FrameParser
         }
 
         if ($length >= 7) {
-            $hour = $reader->readFixedInteger(1);
+            $hour   = $reader->readFixedInteger(1);
             $minute = $reader->readFixedInteger(1);
             $second = $reader->readFixedInteger(1);
 
@@ -214,18 +296,19 @@ class BinaryRowOrEofParser implements FrameParser
         return $dateStr;
     }
 
-    private function parseTime(PayloadReader $reader): ?string
+    private function parseTime(PayloadReader $reader): string
     {
         $length = $reader->readFixedInteger(1);
+
         if ($length === 0) {
             return '00:00:00';
         }
 
         $isNegative = $reader->readFixedInteger(1);
-        $days = $reader->readFixedInteger(4);
-        $hours = $reader->readFixedInteger(1);
-        $minutes = $reader->readFixedInteger(1);
-        $seconds = $reader->readFixedInteger(1);
+        $days       = $reader->readFixedInteger(4);
+        $hours      = $reader->readFixedInteger(1);
+        $minutes    = $reader->readFixedInteger(1);
+        $seconds    = $reader->readFixedInteger(1);
 
         $totalHours = ($days * 24) + $hours;
         $timeStr = \sprintf('%s%02d:%02d:%02d', $isNegative ? '-' : '', $totalHours, $minutes, $seconds);

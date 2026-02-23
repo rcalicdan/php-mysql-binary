@@ -5,7 +5,11 @@ declare(strict_types=1);
 use Rcalicdan\MySQLBinaryProtocol\Buffer\Reader\BinaryIntegerReader;
 use Rcalicdan\MySQLBinaryProtocol\Buffer\Reader\BufferPayloadReaderFactory;
 use Rcalicdan\MySQLBinaryProtocol\Buffer\Writer\BufferPayloadWriter;
+use Rcalicdan\MySQLBinaryProtocol\Constants\ColumnFlags;
+use Rcalicdan\MySQLBinaryProtocol\Constants\MysqlType;
+use Rcalicdan\MySQLBinaryProtocol\Frame\Response\BinaryRowOrEofParser;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Result\ColumnDefinition;
+use Rcalicdan\MySQLBinaryProtocol\Frame\Result\BinaryRow;
 
 uses(PHPUnit\Framework\TestCase::class)->in('.');
 
@@ -97,4 +101,57 @@ CONFIG;
         'resource' => $res,
         'public_key_pem' => $publicKeyDetails['key'],
     ];
+}
+
+/**
+ * Null bitmap offset is +2 bits per the MySQL binary protocol spec.
+ * For N columns: floor((N + 7 + 2) / 8) bytes.
+ * Bit position for column i = i + 2.
+ */
+function buildNullBitmap(int $columnCount, array $nullIndexes = []): string
+{
+    $byteCount = (int) floor(($columnCount + 7 + 2) / 8);
+    $bitmap = array_fill(0, $byteCount, 0);
+
+    foreach ($nullIndexes as $i) {
+        $bitPos = $i + 2;
+        $bitmap[(int) floor($bitPos / 8)] |= (1 << ($bitPos % 8));
+    }
+
+    return implode('', array_map('chr', $bitmap));
+}
+
+function makeCol(int $type, int $flags = 0): ColumnDefinition
+{
+    return new ColumnDefinition('def', 'db', 'tbl', 'tbl', 'col', 'col', 33, 11, $type, $flags, 0);
+}
+
+function buildUnsignedLongLongPayload(string $hexLE): string
+{
+    return "\x00" . buildNullBitmap(1) . hex2bin($hexLE);
+}
+
+function buildSignedLongLongPayload(string $hexLE): string
+{
+    return "\x00" . buildNullBitmap(1) . hex2bin($hexLE);
+}
+
+function unsignedCol(): array
+{
+    return [makeCol(MysqlType::LONGLONG, ColumnFlags::UNSIGNED_FLAG)];
+}
+
+function signedCol(): array
+{
+    return [makeCol(MysqlType::LONGLONG)];
+}
+
+function parseLongLong(array $columns, string $payload): mixed
+{
+    $reader = createReader($payload);
+
+    /** @var BinaryRow $row */
+    $row = (new BinaryRowOrEofParser($columns))->parse($reader, strlen($payload), 1);
+
+    return $row->values[0];
 }
