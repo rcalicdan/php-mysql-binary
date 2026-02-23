@@ -317,11 +317,9 @@ This library implements the MySQL Client/Server Protocol as documented in:
 -  caching_sha2_password authentication
 -  Length-encoded integers and strings
 -  NULL bitmap handling
+-  Compressed packets (CLIENT_COMPRESS)
 
 ### Not Yet Supported
-
--  Compressed packets (CLIENT_COMPRESS) - planned for future release
--  SSL/TLS handshake (protocol layer only; TLS should be handled at transport layer)
 -  Authentication plugin switching
 -  Multi-statement queries
 -  Local INFILE
