@@ -9,11 +9,10 @@ function makeCompressedWriter(): CompressedPacketWriter
     return new CompressedPacketWriter();
 }
 
-
 test('CompressedPacketWriter throws RuntimeException when zlib is not loaded', function () {
     expect(true)->toBeTrue();
 })->skip(
-    !extension_loaded('zlib'),
+    ! extension_loaded('zlib'),
     'zlib extension is not loaded — CompressedPacketWriter cannot be instantiated'
 );
 
@@ -38,9 +37,8 @@ test('CompressedPacketWriter sequence ID at max value 255', function () {
     expect(ord($result[3]))->toBe(255);
 });
 
-
 test('CompressedPacketWriter does not compress payload below threshold', function () {
-    $payload = 'small'; 
+    $payload = 'small';
     $result = makeCompressedWriter()->write($payload, 0);
 
     $uncompressedLength = unpack('V', substr($result, 4, 3) . "\x00")[1];
@@ -58,7 +56,8 @@ test('CompressedPacketWriter uncompressed data is readable as inner uncompressed
     $innerPayload = substr($innerData, 4, $innerLength);
 
     expect($innerPayload)->toBe($payload)
-        ->and($innerSeq)->toBe(1);
+        ->and($innerSeq)->toBe(1)
+    ;
 });
 
 test('CompressedPacketWriter small payload total size is 7 header bytes plus inner packet size', function () {
@@ -67,7 +66,6 @@ test('CompressedPacketWriter small payload total size is 7 header bytes plus inn
 
     expect(strlen($result))->toBe(7 + 4 + strlen($payload));
 });
-
 
 test('CompressedPacketWriter compresses payload above threshold', function () {
     $payload = str_repeat('A', 100); // well above 50 bytes
@@ -102,7 +100,8 @@ test('CompressedPacketWriter compressed data decompresses back to original inner
     $innerPayload = substr($decompressed, 4, $innerLength);
 
     expect($innerPayload)->toBe($payload)
-        ->and($innerSeq)->toBe(2);
+        ->and($innerSeq)->toBe(2)
+    ;
 });
 
 test('CompressedPacketWriter compressed payload is smaller than original for compressible data', function () {
@@ -123,7 +122,7 @@ test('CompressedPacketWriter handles empty payload without compressing', functio
 });
 
 test('CompressedPacketWriter handles binary payload correctly', function () {
-    $payload = str_repeat("\x00\xFF\x01\xFE", 20); 
+    $payload = str_repeat("\x00\xFF\x01\xFE", 20);
     $result = makeCompressedWriter()->write($payload, 0);
 
     $compressedPayloadLength = unpack('V', substr($result, 0, 3) . "\x00")[1];
@@ -132,14 +131,16 @@ test('CompressedPacketWriter handles binary payload correctly', function () {
     $innerPayload = substr($decompressed, 4);
 
     expect($innerPayload)->toBe($payload)
-        ->and($uncompressedLength)->toBeGreaterThan(0);
+        ->and($uncompressedLength)->toBeGreaterThan(0)
+    ;
 });
 
 test('CompressedPacketWriter throws when payload exceeds max packet size', function () {
     $payload = str_repeat('X', 16777216);
 
     expect(fn () => makeCompressedWriter()->write($payload, 0))
-        ->toThrow(InvalidArgumentException::class);
+        ->toThrow(InvalidArgumentException::class)
+    ;
 });
 
 test('CompressedPacketWriter exception message contains actual and max sizes', function () {
@@ -147,7 +148,8 @@ test('CompressedPacketWriter exception message contains actual and max sizes', f
 
     expect(fn () => makeCompressedWriter()->write($payload, 0))
         ->toThrow(InvalidArgumentException::class, '16777216')
-        ->toThrow(InvalidArgumentException::class, '16777215');
+        ->toThrow(InvalidArgumentException::class, '16777215')
+    ;
 });
 
 test('CompressedPacketWriter payload at exact max size does not throw', function () {

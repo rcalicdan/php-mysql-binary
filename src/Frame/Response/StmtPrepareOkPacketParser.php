@@ -8,6 +8,13 @@ use Rcalicdan\MySQLBinaryProtocol\Frame\Frame;
 use Rcalicdan\MySQLBinaryProtocol\Frame\FrameParser;
 use Rcalicdan\MySQLBinaryProtocol\Packet\PayloadReader;
 
+/**
+ * Parses a Statement Prepare OK packet response from the MySQL binary protocol.
+ *
+ * This parser is responsible for handling and extracting data from OK packets
+ * that are sent in response to a PREPARE statement. It implements the FrameParser
+ * interface to provide a standardized way of parsing MySQL protocol frames.
+ */
 class StmtPrepareOkPacketParser implements FrameParser
 {
     public function parse(PayloadReader $payload, int $length, int $sequenceNumber): Frame

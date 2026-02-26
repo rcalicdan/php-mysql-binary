@@ -5,14 +5,14 @@ declare(strict_types=1);
 use Rcalicdan\MySQLBinaryProtocol\Exception\IncompleteBufferException;
 use Rcalicdan\MySQLBinaryProtocol\Packet\PayloadReader;
 
-
 test('UncompressedPacketReader has no packet before any data is appended', function () {
     expect(makePacketReader()->hasPacket())->toBeFalse();
 });
 
 test('UncompressedPacketReader throws IncompleteBufferException when reading with no packet', function () {
     expect(fn () => makePacketReader()->readPayload(fn () => null))
-        ->toThrow(IncompleteBufferException::class);
+        ->toThrow(IncompleteBufferException::class)
+    ;
 });
 
 test('UncompressedPacketReader detects packet after complete data is appended', function () {
@@ -35,7 +35,6 @@ test('UncompressedPacketReader registers packet from header even when payload no
 
     expect($reader->hasPacket())->toBeTrue();
 });
-
 
 test('UncompressedPacketReader passes correct length to readPayload callback', function () {
     $reader = makePacketReader();
@@ -73,7 +72,6 @@ test('UncompressedPacketReader passes PayloadReader instance to readPayload call
 
     expect($capturedReader)->toBeInstanceOf(PayloadReader::class);
 });
-
 
 test('UncompressedPacketReader readPayload returns true on successful read', function () {
     $reader = makePacketReader();
@@ -126,7 +124,6 @@ test('UncompressedPacketReader reassembles packet when payload arrives in two ch
 
     expect($capturedLength)->toBe(strlen($payload));
 });
-
 
 test('UncompressedPacketReader handles two packets appended together', function () {
     $reader = makePacketReader();
@@ -194,7 +191,7 @@ test('UncompressedPacketReader handles binary payload correctly', function () {
 
 test('UncompressedPacketReader writer output is readable by reader', function () {
     $reader = makePacketReader();
-    $writer = new \Rcalicdan\MySQLBinaryProtocol\Packet\UncompressedPacketWriter();
+    $writer = new Rcalicdan\MySQLBinaryProtocol\Packet\UncompressedPacketWriter();
 
     $original = 'SELECT 1';
     $reader->append($writer->write($original, 5));
@@ -207,5 +204,6 @@ test('UncompressedPacketReader writer output is readable by reader', function ()
     });
 
     expect($read)->toBe($original)
-        ->and($capturedSeq)->toBe(5);
+        ->and($capturedSeq)->toBe(5)
+    ;
 });

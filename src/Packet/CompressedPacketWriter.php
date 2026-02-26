@@ -21,7 +21,7 @@ class CompressedPacketWriter implements PacketWriter
 
     public function __construct(?BinaryWriter $binaryWriter = null)
     {
-        if (!extension_loaded('zlib')) {
+        if (! extension_loaded('zlib')) {
             throw new \RuntimeException('The zlib extension is required for MySQL compression.');
         }
         $this->binaryWriter = $binaryWriter ?? new BinaryWriter();

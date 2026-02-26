@@ -63,7 +63,8 @@ function buildColumnPayload(
         ->writeUInt8($type)
         ->writeUInt16(0)
         ->writeUInt8(0)
-        ->writeUInt16(0);
+        ->writeUInt16(0)
+    ;
 
     return $writer->toString();
 }
@@ -197,11 +198,30 @@ function buildCompressedProtocolPacket(string $innerData, int $sequence = 0, boo
         $uncompressedLength = strlen($innerData);
     } else {
         $compressedData = $innerData;
-        $uncompressedLength = 0; 
+        $uncompressedLength = 0;
     }
 
     return substr(pack('V', strlen($compressedData)), 0, 3)
         . chr($sequence)
         . substr(pack('V', $uncompressedLength), 0, 3)
         . $compressedData;
+}
+
+/**
+ * Builds a raw text-row payload of length-encoded strings.
+ * NULL columns use the 0xFB sentinel.
+ */
+function buildTextRowPayload(array $values): string
+{
+    $data = '';
+    foreach ($values as $value) {
+        if ($value === null) {
+            $data .= "\xFB";
+        } else {
+            $str = (string) $value;
+            $data .= chr(strlen($str)) . $str;
+        }
+    }
+
+    return $data;
 }

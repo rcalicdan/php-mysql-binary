@@ -8,12 +8,12 @@ use Rcalicdan\MySQLBinaryProtocol\Frame\Response\StmtPrepareResponseParser;
 
 test('StmtPrepareResponseParser parses OK packet with all fields', function () {
     $payload =
-        "\x00"        
-        . pack('V', 7)   
-        . pack('v', 3)  
+        "\x00"
+        . pack('V', 7)
+        . pack('v', 3)
         . pack('v', 2)
-        . "\x00"      
-        . pack('v', 1);  
+        . "\x00"
+        . pack('v', 1);
 
     $reader = createReader($payload);
 
@@ -25,7 +25,8 @@ test('StmtPrepareResponseParser parses OK packet with all fields', function () {
         ->and($packet->numColumns)->toBe(3)
         ->and($packet->numParams)->toBe(2)
         ->and($packet->warningCount)->toBe(1)
-        ->and($packet->sequenceNumber)->toBe(1);
+        ->and($packet->sequenceNumber)->toBe(1)
+    ;
 });
 
 test('StmtPrepareResponseParser parses OK packet with zero columns and params', function () {
@@ -46,11 +47,12 @@ test('StmtPrepareResponseParser parses OK packet with zero columns and params', 
         ->and($packet->statementId)->toBe(42)
         ->and($packet->numColumns)->toBe(0)
         ->and($packet->numParams)->toBe(0)
-        ->and($packet->warningCount)->toBe(0);
+        ->and($packet->warningCount)->toBe(0)
+    ;
 });
 
 test('StmtPrepareResponseParser parses ERR packet', function () {
-    $errorMsg = "You have an error in your SQL syntax";
+    $errorMsg = 'You have an error in your SQL syntax';
     $payload = "\xFF" . pack('v', 1064) . '#42000' . $errorMsg;
 
     $reader = createReader($payload);
@@ -63,16 +65,18 @@ test('StmtPrepareResponseParser parses ERR packet', function () {
         ->and($packet->sqlStateMarker)->toBe('#')
         ->and($packet->sqlState)->toBe('42000')
         ->and($packet->errorMessage)->toBe($errorMsg)
-        ->and($packet->sequenceNumber)->toBe(3);
+        ->and($packet->sequenceNumber)->toBe(3)
+    ;
 });
 
 test('StmtPrepareResponseParser throws on unexpected packet type', function () {
-    $payload = "\x01"; 
+    $payload = "\x01";
 
     $reader = createReader($payload);
 
     expect(fn () => (new StmtPrepareResponseParser())->parse($reader, strlen($payload), 1))
-        ->toThrow(RuntimeException::class);
+        ->toThrow(RuntimeException::class)
+    ;
 });
 
 test('StmtPrepareResponseParser parses OK packet with large statement ID', function () {

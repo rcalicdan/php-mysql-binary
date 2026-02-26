@@ -46,14 +46,22 @@ class BufferPayloadReader implements PayloadReader
     public function readLengthEncodedIntegerOrNull(): float|int|null
     {
         $firstByte = $this->readFixedInteger(1);
+
+        return $this->readLengthEncodedIntegerFromByte((int) $firstByte);
+    }
+
+    public function readLengthEncodedIntegerFromByte(int $firstByte): int|float|null
+    {
         if ($firstByte < 251) {
-            return (int) $firstByte;
+            return $firstByte;
         }
+
         if ($firstByte === self::NULL_MARKER) {
             return null;
         }
-        if (! \is_int($firstByte) || ! isset(self::LENGTH_MARKERS[$firstByte])) {
-            throw new InvalidBinaryDataException();
+
+        if (! isset(self::LENGTH_MARKERS[$firstByte])) {
+            throw new InvalidBinaryDataException(\sprintf('Invalid length-encoded integer marker: 0x%02X', $firstByte));
         }
 
         return $this->readFixedInteger(self::LENGTH_MARKERS[$firstByte]);
@@ -67,6 +75,17 @@ class BufferPayloadReader implements PayloadReader
     public function readLengthEncodedStringOrNull(): ?string
     {
         $length = $this->readLengthEncodedIntegerOrNull();
+        if ($length === null) {
+            return null;
+        }
+
+        return $this->buffer->read((int) $length);
+    }
+
+    public function readLengthEncodedStringFromByte(int $firstByte): ?string
+    {
+        $length = $this->readLengthEncodedIntegerFromByte($firstByte);
+
         if ($length === null) {
             return null;
         }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Rcalicdan\MySQLBinaryProtocol\Frame\Response;
 
+use Rcalicdan\MySQLBinaryProtocol\Constants\StatusFlags;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Frame;
 
 /**
@@ -18,5 +19,13 @@ final readonly class EofPacket implements Frame
         public int $statusFlags,
         public int $sequenceNumber
     ) {
+    }
+
+    /**
+     * Checks if the SERVER_MORE_RESULTS_EXISTS flag is set.
+     */
+    public function hasMoreResults(): bool
+    {
+        return ($this->statusFlags & StatusFlags::SERVER_MORE_RESULTS_EXISTS) !== 0;
     }
 }

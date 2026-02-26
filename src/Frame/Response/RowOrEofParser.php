@@ -9,6 +9,18 @@ use Rcalicdan\MySQLBinaryProtocol\Frame\FrameParser;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Result\TextRow;
 use Rcalicdan\MySQLBinaryProtocol\Packet\PayloadReader;
 
+/**
+ * RowOrEofParser
+ *
+ * Parser for handling MySQL protocol row data or EOF (End of File) frames.
+ * 
+ * This class is responsible for parsing and interpreting binary protocol frames
+ * that represent either a data row from a result set or an EOF packet that signals
+ * the end of data transmission from the MySQL server.
+ * 
+ * Implements the FrameParser interface to provide consistent frame parsing behavior
+ * within the MySQL binary protocol handling system.
+ */
 class RowOrEofParser implements FrameParser
 {
     public function __construct(
@@ -44,7 +56,7 @@ class RowOrEofParser implements FrameParser
 
         $values = [];
 
-        $firstValue = $this->readLengthEncodedStringFromByte($payload, (int)$firstByte);
+        $firstValue = $payload->readLengthEncodedStringFromByte((int)$firstByte);
         $values[] = $firstValue;
 
         for ($i = 1; $i < $this->columnCount; $i++) {
@@ -52,38 +64,5 @@ class RowOrEofParser implements FrameParser
         }
 
         return new TextRow($values);
-    }
-
-    private function readLengthEncodedStringFromByte(PayloadReader $payload, int $firstByte): ?string
-    {
-        if ($firstByte === 0xFB) {
-            return null;
-        }
-
-        if ($firstByte < 0xFB) {
-            return $payload->readFixedString($firstByte);
-        }
-
-        if ($firstByte === 0xFC) {
-            $length = $payload->readFixedInteger(2);
-
-            return $payload->readFixedString((int)$length);
-        }
-
-        if ($firstByte === 0xFD) {
-            $length = $payload->readFixedInteger(3);
-
-            return $payload->readFixedString((int)$length);
-        }
-
-        if ($firstByte === 0xFE) {
-            $length = $payload->readFixedInteger(8);
-
-            return $payload->readFixedString((int)$length);
-        }
-
-        throw new \RuntimeException(
-            \sprintf('Invalid length-encoded string marker: 0x%02X', $firstByte)
-        );
     }
 }

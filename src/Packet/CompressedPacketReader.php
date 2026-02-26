@@ -29,7 +29,7 @@ class CompressedPacketReader implements PacketReader
         ReadBuffer $readBuffer,
         UncompressedPacketReader $innerPacketReader
     ) {
-        if (!extension_loaded('zlib')) {
+        if (! extension_loaded('zlib')) {
             throw new \RuntimeException('The zlib extension is required for MySQL compression.');
         }
 
@@ -78,6 +78,7 @@ class CompressedPacketReader implements PacketReader
 
         if (\strlen($data) < self::PACKET_HEADER_SIZE) {
             $this->partialHeader = $data;
+
             return '';
         }
 
@@ -85,7 +86,6 @@ class CompressedPacketReader implements PacketReader
 
         $this->compressedPayloadLength = (int) $this->binaryIntegerReader->readFixed(substr($header, 0, 3), 3);
         $this->originalCompressedLength = $this->compressedPayloadLength;
-
 
         $this->uncompressedLength = (int) $this->binaryIntegerReader->readFixed(substr($header, 4, 3), 3);
 
@@ -111,6 +111,7 @@ class CompressedPacketReader implements PacketReader
 
         if ($this->uncompressedLength === 0) {
             $this->innerPacketReader->append($rawData);
+
             return;
         }
 

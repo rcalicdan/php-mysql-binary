@@ -55,4 +55,18 @@ interface PayloadReader
      * @return string The remaining packet data
      */
     public function readRestOfPacketString(): string;
+
+    /**
+     * Reads a length-encoded integer when the first byte has already been consumed.
+     *
+     * @param int $firstByte The marker byte that was previously read
+     */
+    public function readLengthEncodedIntegerFromByte(int $firstByte): float|int|null;
+
+    /**
+     * Reads a length-encoded string when the first byte has already been consumed.
+     *
+     * @param int $firstByte The marker byte that was previously read
+     */
+    public function readLengthEncodedStringFromByte(int $firstByte): ?string;
 }

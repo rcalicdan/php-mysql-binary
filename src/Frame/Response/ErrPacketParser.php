@@ -35,4 +35,21 @@ class ErrPacketParser implements FrameParser
             $sequenceNumber
         );
     }
+
+    public function parseWithFirstByte(PayloadReader $payload, int $sequenceNumber): Frame
+    {
+        // First byte 0xFF already consumed
+        $errorCode = $payload->readFixedInteger(2);
+        $sqlStateMarker = $payload->readFixedString(1);
+        $sqlState = $payload->readFixedString(5);
+        $errorMessage = $payload->readRestOfPacketString();
+
+        return new ErrPacket(
+            (int)$errorCode,
+            $sqlStateMarker,
+            $sqlState,
+            $errorMessage,
+            $sequenceNumber
+        );
+    }
 }

@@ -24,7 +24,8 @@ test('ColumnDefinitionOrEofParser parses a full column definition', function () 
         ->and($packet->orgTable)->toBe('users')
         ->and($packet->name)->toBe('id')
         ->and($packet->orgName)->toBe('id')
-        ->and($packet->type)->toBe(MysqlType::LONG);
+        ->and($packet->type)->toBe(MysqlType::LONG)
+    ;
 });
 
 test('ColumnDefinitionOrEofParser parses column definition with VARCHAR type', function () {
@@ -37,7 +38,8 @@ test('ColumnDefinitionOrEofParser parses column definition with VARCHAR type', f
 
     expect($packet)->toBeInstanceOf(ColumnDefinition::class)
         ->and($packet->name)->toBe('username')
-        ->and($packet->type)->toBe(MysqlType::VAR_STRING);
+        ->and($packet->type)->toBe(MysqlType::VAR_STRING)
+    ;
 });
 
 test('ColumnDefinitionOrEofParser parses EOF packet', function () {
@@ -51,7 +53,8 @@ test('ColumnDefinitionOrEofParser parses EOF packet', function () {
     expect($packet)->toBeInstanceOf(EofPacket::class)
         ->and($packet->warnings)->toBe(2)
         ->and($packet->statusFlags)->toBe(8)
-        ->and($packet->sequenceNumber)->toBe(4);
+        ->and($packet->sequenceNumber)->toBe(4)
+    ;
 });
 
 test('ColumnDefinitionOrEofParser parses EOF packet with zero warnings', function () {
@@ -64,7 +67,8 @@ test('ColumnDefinitionOrEofParser parses EOF packet with zero warnings', functio
 
     expect($packet)->toBeInstanceOf(EofPacket::class)
         ->and($packet->warnings)->toBe(0)
-        ->and($packet->statusFlags)->toBe(0);
+        ->and($packet->statusFlags)->toBe(0)
+    ;
 });
 
 test('ColumnDefinitionOrEofParser parses ERR packet', function () {
@@ -80,7 +84,8 @@ test('ColumnDefinitionOrEofParser parses ERR packet', function () {
         ->and($packet->errorCode)->toBe(1146)
         ->and($packet->sqlStateMarker)->toBe('#')
         ->and($packet->sqlState)->toBe('42S02')
-        ->and($packet->errorMessage)->toBe($errorMsg);
+        ->and($packet->errorMessage)->toBe($errorMsg)
+    ;
 });
 
 test('ColumnDefinitionOrEofParser returns MetadataOmittedRowMarker when first byte is 0x00', function () {

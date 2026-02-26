@@ -2,15 +2,14 @@
 
 declare(strict_types=1);
 
-use Rcalicdan\MySQLBinaryProtocol\Exception\InvalidBinaryDataException;
 use Rcalicdan\MySQLBinaryProtocol\Exception\IncompleteBufferException;
+use Rcalicdan\MySQLBinaryProtocol\Exception\InvalidBinaryDataException;
 use Rcalicdan\MySQLBinaryProtocol\Packet\PayloadReader;
-
 
 test('CompressedPacketReader throws RuntimeException when zlib is not loaded', function () {
     expect(true)->toBeTrue();
 })->skip(
-    !extension_loaded('zlib'),
+    ! extension_loaded('zlib'),
     'zlib extension is not loaded — CompressedPacketReader cannot be instantiated'
 );
 
@@ -20,7 +19,8 @@ test('CompressedPacketReader has no packet before any data is appended', functio
 
 test('CompressedPacketReader throws IncompleteBufferException when reading with no packet', function () {
     expect(fn () => makeCompressedPacketReader()->readPayload(fn () => null))
-        ->toThrow(IncompleteBufferException::class);
+        ->toThrow(IncompleteBufferException::class)
+    ;
 });
 
 test('CompressedPacketReader detects packet from non-compressed data', function () {
@@ -56,7 +56,6 @@ test('CompressedPacketReader passes correct sequence number from non-compressed 
 
     expect($capturedSeq)->toBe(7);
 });
-
 
 test('CompressedPacketReader detects packet from compressed data', function () {
     $reader = makeCompressedPacketReader();
@@ -172,7 +171,8 @@ test('CompressedPacketReader handles mix of compressed and non-compressed packet
     });
 
     expect($results[0])->toBe('small')
-        ->and($results[1])->toBe(str_repeat('L', 100));
+        ->and($results[1])->toBe(str_repeat('L', 100))
+    ;
 });
 
 test('CompressedPacketReader has no more packets after all have been consumed', function () {
@@ -186,7 +186,6 @@ test('CompressedPacketReader has no more packets after all have been consumed', 
     expect($reader->hasPacket())->toBeFalse();
 });
 
-
 test('CompressedPacketReader throws InvalidBinaryDataException on corrupt compressed data', function () {
     $reader = makeCompressedPacketReader();
 
@@ -199,7 +198,8 @@ test('CompressedPacketReader throws InvalidBinaryDataException on corrupt compre
         . $corruptData;
 
     expect(fn () => $reader->append($packet))
-        ->toThrow(InvalidBinaryDataException::class, 'Failed to decompress');
+        ->toThrow(InvalidBinaryDataException::class, 'Failed to decompress')
+    ;
 });
 
 test('CompressedPacketReader throws InvalidBinaryDataException on decompression size mismatch', function () {
@@ -217,9 +217,9 @@ test('CompressedPacketReader throws InvalidBinaryDataException on decompression 
         . $compressed;
 
     expect(fn () => $reader->append($packet))
-        ->toThrow(InvalidBinaryDataException::class, 'mismatch');
+        ->toThrow(InvalidBinaryDataException::class, 'mismatch')
+    ;
 });
-
 
 test('CompressedPacketReader readPayload returns true on successful read', function () {
     $reader = makeCompressedPacketReader();
@@ -258,7 +258,8 @@ test('CompressedPacketReader reads non-compressed output from CompressedPacketWr
     });
 
     expect($read)->toBe($original)
-        ->and($capturedSeq)->toBe(3);
+        ->and($capturedSeq)->toBe(3)
+    ;
 });
 
 test('CompressedPacketReader reads compressed output from CompressedPacketWriter', function () {
@@ -276,7 +277,8 @@ test('CompressedPacketReader reads compressed output from CompressedPacketWriter
     });
 
     expect($read)->toBe($original)
-        ->and($capturedSeq)->toBe(4);
+        ->and($capturedSeq)->toBe(4)
+    ;
 });
 
 test('CompressedPacketReader reads multiple packets written by CompressedPacketWriter', function () {

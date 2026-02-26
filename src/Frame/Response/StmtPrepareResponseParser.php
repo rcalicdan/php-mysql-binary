@@ -8,6 +8,17 @@ use Rcalicdan\MySQLBinaryProtocol\Frame\Frame;
 use Rcalicdan\MySQLBinaryProtocol\Frame\FrameParser;
 use Rcalicdan\MySQLBinaryProtocol\Packet\PayloadReader;
 
+/**
+ * Parses the response frame for a prepared statement preparation request.
+ *
+ * This parser implements the FrameParser interface and is responsible for
+ * parsing the server's response when a prepared statement is prepared using
+ * the STMT_PREPARE command in the MySQL binary protocol.
+ *
+ * The parser handles the extraction and interpretation of metadata from the
+ * preparation response, including the statement ID, number of columns,
+ * parameters, and warnings.
+ */
 class StmtPrepareResponseParser implements FrameParser
 {
     public function parse(PayloadReader $payload, int $length, int $sequenceNumber): Frame

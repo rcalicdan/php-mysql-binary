@@ -11,6 +11,16 @@ use Rcalicdan\MySQLBinaryProtocol\Frame\FrameParser;
 use Rcalicdan\MySQLBinaryProtocol\Frame\Result\ColumnDefinition;
 use Rcalicdan\MySQLBinaryProtocol\Packet\PayloadReader;
 
+/**
+ * Parser for handling column definition or EOF (End of File) frames in MySQL binary protocol.
+ * 
+ * This class implements the FrameParser interface and is responsible for parsing incoming
+ * frames to determine whether they represent column definition metadata or an EOF packet
+ * that signals the end of a result set or statement execution.
+ * 
+ * The parser distinguishes between column definition frames and EOF frames based on the
+ * frame header and content, providing appropriate parsing logic for each frame type.
+ */
 class ColumnDefinitionOrEofParser implements FrameParser
 {
     public function parse(PayloadReader $payload, int $length, int $sequenceNumber): Frame
@@ -76,19 +86,19 @@ class ColumnDefinitionOrEofParser implements FrameParser
         if ($firstByte === LengthEncodedType::NULL_MARKER) {
             return null;
         }
-        
+
         if ($firstByte < LengthEncodedType::NULL_MARKER) {
             return $payload->readFixedString($firstByte);
         }
-        
+
         if ($firstByte === LengthEncodedType::INT16_LENGTH) {
             return $payload->readFixedString((int)$payload->readFixedInteger(2));
         }
-        
+
         if ($firstByte === LengthEncodedType::INT24_LENGTH) {
             return $payload->readFixedString((int)$payload->readFixedInteger(3));
         }
-        
+
         if ($firstByte === LengthEncodedType::INT64_LENGTH) {
             return $payload->readFixedString((int)$payload->readFixedInteger(8));
         }

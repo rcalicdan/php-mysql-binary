@@ -16,7 +16,8 @@ test('UncompressedPacketWriter produces correct 4-byte header', function () {
     $length = unpack('V', substr($result, 0, 3) . "\x00")[1];
 
     expect($length)->toBe(5)
-        ->and(ord($result[3]))->toBe(0);
+        ->and(ord($result[3]))->toBe(0)
+    ;
 });
 
 test('UncompressedPacketWriter encodes length as 3-byte little-endian', function () {
@@ -26,7 +27,8 @@ test('UncompressedPacketWriter encodes length as 3-byte little-endian', function
 
     expect($result[0])->toBe("\x00")
         ->and($result[1])->toBe("\x01")
-        ->and($result[2])->toBe("\x00");
+        ->and($result[2])->toBe("\x00")
+    ;
 });
 
 test('UncompressedPacketWriter correctly encodes sequence ID in header byte', function () {
@@ -61,7 +63,8 @@ test('UncompressedPacketWriter handles empty payload', function () {
     expect(strlen($result))->toBe(4)
         ->and($result[0])->toBe("\x00")
         ->and($result[1])->toBe("\x00")
-        ->and($result[2])->toBe("\x00");
+        ->and($result[2])->toBe("\x00")
+    ;
 });
 
 test('UncompressedPacketWriter accepts payload at exact max size', function () {
@@ -78,12 +81,12 @@ test('UncompressedPacketWriter output matches expected packet format', function 
     expect($result)->toBe(buildRawPacket($payload, 3));
 });
 
-
 test('UncompressedPacketWriter throws when payload exceeds max packet size', function () {
     $payload = str_repeat('X', 16777216);
 
     expect(fn () => makeWriter()->write($payload, 0))
-        ->toThrow(InvalidArgumentException::class);
+        ->toThrow(InvalidArgumentException::class)
+    ;
 });
 
 test('UncompressedPacketWriter exception message contains actual and max size', function () {
