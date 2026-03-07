@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hibla\Mysql\Internals;
-
-use Rcalicdan\MySQLBinaryProtocol\Packet\PacketWriter;
+namespace Rcalicdan\MySQLBinaryProtocol\Packet;
 
 /**
  * Handles splitting large payloads into MySQL's 16MB packet chunks.
