@@ -8,8 +8,6 @@ use Rcalicdan\MySQLBinaryProtocol\Packet\PacketWriter;
 
 /**
  * Handles splitting large payloads into MySQL's 16MB packet chunks.
- *
- * @internal
  */
 final class PacketFramer
 {
