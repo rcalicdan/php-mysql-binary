@@ -21,7 +21,9 @@ class CompressedPacketReader implements PacketReader
     private string $partialHeader = '';
 
     private BinaryIntegerReader $binaryIntegerReader;
+
     private ReadBuffer $compressedBuffer;
+
     private UncompressedPacketReader $innerPacketReader;
 
     public function __construct(

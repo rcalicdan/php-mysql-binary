@@ -9,7 +9,7 @@ use Rcalicdan\MySQLBinaryProtocol\Constants\CapabilityFlags;
 
 /**
  * Builds the SSL Request packet.
- * 
+ *
  * Sent by the client to request an SSL connection before sending the full HandshakeResponse.
  * This is effectively a truncated HandshakeResponse containing only the client capabilities,
  * max packet size, and character set.

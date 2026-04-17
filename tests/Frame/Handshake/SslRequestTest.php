@@ -23,7 +23,7 @@ test('builds SSL request packet with correct structure', function () {
 });
 
 test('always sets CLIENT_SSL flag regardless of input capabilities', function () {
-    $caps = 0; 
+    $caps = 0;
 
     $packet = (new SslRequest())->build($caps, 33);
 
@@ -39,5 +39,6 @@ test('preserves other capability flags alongside CLIENT_SSL', function () {
     $builtCaps = unpack('V', substr($packet, 0, 4))[1];
     expect($builtCaps & CapabilityFlags::CLIENT_PROTOCOL_41)->not->toBe(0)
         ->and($builtCaps & CapabilityFlags::CLIENT_SECURE_CONNECTION)->not->toBe(0)
-        ->and($builtCaps & CapabilityFlags::CLIENT_SSL)->not->toBe(0);
+        ->and($builtCaps & CapabilityFlags::CLIENT_SSL)->not->toBe(0)
+    ;
 });

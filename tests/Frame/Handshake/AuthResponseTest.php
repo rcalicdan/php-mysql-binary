@@ -17,7 +17,8 @@ test('parses OK packet', function () {
     $frame = (new AuthResponseParser())->parse($reader, strlen($payload), 2);
 
     expect($frame)->toBeInstanceOf(OkPacket::class)
-        ->and($frame->sequenceNumber)->toBe(2);
+        ->and($frame->sequenceNumber)->toBe(2)
+    ;
 });
 
 test('parses ERR packet', function () {
@@ -31,7 +32,8 @@ test('parses ERR packet', function () {
     expect($frame)->toBeInstanceOf(ErrPacket::class)
         ->and($frame->errorCode)->toBe(1045)
         ->and($frame->sqlState)->toBe('28000')
-        ->and($frame->errorMessage)->toBe($errorMsg);
+        ->and($frame->errorMessage)->toBe($errorMsg)
+    ;
 });
 
 test('parses AuthSwitchRequest packet', function () {
@@ -46,7 +48,8 @@ test('parses AuthSwitchRequest packet', function () {
     expect($frame)->toBeInstanceOf(AuthSwitchRequest::class)
         ->and($frame->pluginName)->toBe($pluginName)
         ->and($frame->authData)->toBe($authData)
-        ->and($frame->sequenceNumber)->toBe(3);
+        ->and($frame->sequenceNumber)->toBe(3)
+    ;
 });
 
 test('parses AuthMoreData with fast auth success', function () {
@@ -58,7 +61,8 @@ test('parses AuthMoreData with fast auth success', function () {
 
     expect($frame)->toBeInstanceOf(AuthMoreData::class)
         ->and($frame->isFastAuthSuccess())->toBeTrue()
-        ->and($frame->sequenceNumber)->toBe(4);
+        ->and($frame->sequenceNumber)->toBe(4)
+    ;
 });
 
 test('parses AuthMoreData with full auth required', function () {
@@ -69,7 +73,8 @@ test('parses AuthMoreData with full auth required', function () {
     $frame = (new AuthResponseParser())->parse($reader, strlen($payload), 5);
 
     expect($frame)->toBeInstanceOf(AuthMoreData::class)
-        ->and($frame->isFullAuthRequired())->toBeTrue();
+        ->and($frame->isFullAuthRequired())->toBeTrue()
+    ;
 });
 
 test('parses AuthMoreData with RSA key payload', function () {
@@ -83,7 +88,8 @@ test('parses AuthMoreData with RSA key payload', function () {
     expect($frame)->toBeInstanceOf(AuthMoreData::class)
         ->and($frame->data)->toBe($rsaKey)
         ->and($frame->isFullAuthRequired())->toBeFalse()
-        ->and($frame->isFastAuthSuccess())->toBeFalse();
+        ->and($frame->isFastAuthSuccess())->toBeFalse()
+    ;
 });
 
 test('throws RuntimeException on unexpected packet type', function () {
@@ -91,5 +97,5 @@ test('throws RuntimeException on unexpected packet type', function () {
     $reader = createReader($payload);
 
     expect(fn () => (new AuthResponseParser())->parse($reader, strlen($payload), 1))
-        ->toThrow(\RuntimeException::class, 'Unexpected packet type during authentication phase: 0x42');
+        ->toThrow(RuntimeException::class, 'Unexpected packet type during authentication phase: 0x42');
 });

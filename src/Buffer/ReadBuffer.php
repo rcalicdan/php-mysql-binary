@@ -21,8 +21,11 @@ class ReadBuffer
     private const ONE_MEGABYTE = 1024 * 1024;
 
     private string $buffer = '';
+
     private int $currentBufferOffset = 0;
+
     private int $readBufferOffset = 0;
+
     private int $bufferSize;
 
     /**
@@ -49,7 +52,9 @@ class ReadBuffer
      * Reads a specified number of bytes from the buffer.
      *
      * @param int $length Number of bytes to read
+     *
      * @return string The read data
+     *
      * @throws IncompleteBufferException If insufficient data is available
      */
     public function read(int $length): string
@@ -70,6 +75,7 @@ class ReadBuffer
      * Checks if the specified number of bytes can be read from the buffer.
      *
      * @param int $length Number of bytes to check
+     *
      * @return bool True if readable, false otherwise
      */
     public function isReadable(int $length): bool
@@ -110,6 +116,7 @@ class ReadBuffer
      * Scans for a pattern in the buffer starting from the current position.
      *
      * @param string $pattern The pattern to search for
+     *
      * @return int Position relative to current offset, or -1 if not found
      */
     public function scan(string $pattern): int

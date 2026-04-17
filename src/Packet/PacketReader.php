@@ -23,6 +23,7 @@ interface PacketReader
      * Attempts to read a complete packet payload and pass it to the provided reader.
      *
      * @param callable $reader Callback function to process the payload
+     *
      * @return bool True if a complete packet was read, false if more data is needed
      */
     public function readPayload(callable $reader): bool;

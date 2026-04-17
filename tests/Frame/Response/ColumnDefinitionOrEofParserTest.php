@@ -108,5 +108,6 @@ test('ColumnDefinitionOrEofParser parses column with different name and orgName'
 
     expect($packet)->toBeInstanceOf(ColumnDefinition::class)
         ->and($packet->name)->toBe('aliased_col')
-        ->and($packet->table)->toBe('orders');
+        ->and($packet->table)->toBe('orders')
+    ;
 });

@@ -305,5 +305,6 @@ test('CompressedPacketReader reads multiple packets written by CompressedPacketW
 
     expect($results[0])->toBe($small)
         ->and($results[1])->toBe($large)
-        ->and($sequences)->toBe([0, 1]);
+        ->and($sequences)->toBe([0, 1])
+    ;
 });

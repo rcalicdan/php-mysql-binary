@@ -96,5 +96,6 @@ test('StmtPrepareResponseParser parses OK packet with large statement ID', funct
     expect($packet)->toBeInstanceOf(StmtPrepareOkPacket::class)
         ->and($packet->statementId)->toBe(0xFFFFFFFF)
         ->and($packet->numColumns)->toBe(10)
-        ->and($packet->numParams)->toBe(5);
+        ->and($packet->numParams)->toBe(5)
+    ;
 });

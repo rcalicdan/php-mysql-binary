@@ -16,13 +16,14 @@ final class PacketFramer
 
     /**
      * Lazily yields formatted packet chunks for writing to the socket.
-     * 
-     * Using a Generator prevents memory doubling on very large payloads 
+     *
+     * Using a Generator prevents memory doubling on very large payloads
      * by only framing the current chunk in memory.
      *
      * @param string $payload The raw command payload.
      * @param PacketWriter $writer The protocol packet writer.
      * @param int $sequenceId The current sequence ID, automatically incremented.
+     *
      * @return \Generator<int, string>
      */
     public function frame(string $payload, PacketWriter $writer, int &$sequenceId): \Generator
@@ -42,7 +43,7 @@ final class PacketFramer
 
         $chunk = substr($payload, $offset);
         yield $writer->write($chunk, $sequenceId);
-        
+
         $sequenceId++;
     }
 }

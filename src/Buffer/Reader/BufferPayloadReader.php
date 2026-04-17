@@ -17,11 +17,13 @@ class BufferPayloadReader implements PayloadReader
         0xfe => 8,
     ];
     private const NULL_MARKER = 0xfb;
+
     private ReadBuffer $buffer;
+
     private BinaryIntegerReader $integerReader;
 
     /**
-     *  @var array<int, int>
+     * @var array<int, int>
      */
     private array $unreadPacketLength;
 

@@ -91,10 +91,10 @@ class BinaryRowParser implements FrameParser
         ) {
             $val = (int) $val;
             $val = match ($column->type) {
-                MysqlType::TINY  => $val >= DataTypeBounds::TINYINT_SIGN_BIT    ? $val - DataTypeBounds::TINYINT_RANGE    : $val,
-                MysqlType::SHORT => $val >= DataTypeBounds::SMALLINT_SIGN_BIT   ? $val - DataTypeBounds::SMALLINT_RANGE   : $val,
-                MysqlType::INT24 => $val >= DataTypeBounds::MEDIUMINT_SIGN_BIT  ? $val - DataTypeBounds::MEDIUMINT_RANGE  : $val,
-                MysqlType::LONG  => $val >= DataTypeBounds::INT_SIGN_BIT        ? $val - DataTypeBounds::INT_RANGE        : $val,
+                MysqlType::TINY => $val >= DataTypeBounds::TINYINT_SIGN_BIT ? $val - DataTypeBounds::TINYINT_RANGE : $val,
+                MysqlType::SHORT => $val >= DataTypeBounds::SMALLINT_SIGN_BIT ? $val - DataTypeBounds::SMALLINT_RANGE : $val,
+                MysqlType::INT24 => $val >= DataTypeBounds::MEDIUMINT_SIGN_BIT ? $val - DataTypeBounds::MEDIUMINT_RANGE : $val,
+                MysqlType::LONG => $val >= DataTypeBounds::INT_SIGN_BIT ? $val - DataTypeBounds::INT_RANGE : $val,
             };
         }
 

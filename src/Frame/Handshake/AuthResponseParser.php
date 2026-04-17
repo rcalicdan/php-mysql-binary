@@ -31,13 +31,13 @@ class AuthResponseParser implements FrameParser
         if ($firstByte === AuthPacketType::AUTH_SWITCH_REQUEST) {
             $pluginName = $payload->readNullTerminatedString();
             $authData = $payload->readRestOfPacketString();
-            
+
             return new AuthSwitchRequest($pluginName, $authData, $sequenceNumber);
         }
 
         if ($firstByte === AuthPacketType::AUTH_MORE_DATA) {
             $data = $payload->readRestOfPacketString();
-            
+
             return new AuthMoreData($data, $sequenceNumber);
         }
 

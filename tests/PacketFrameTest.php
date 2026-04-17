@@ -55,7 +55,6 @@ test('frame empty payload packet is a valid 4-byte header with zero length', fun
     ;
 });
 
-
 test('frame uses the provided starting sequenceId', function () {
     $seqId = 7;
     $packets = iterator_to_array(makeFramer()->frame('hello', makeFramerWriter(), $seqId));
@@ -117,7 +116,7 @@ test('frame chunk payloads reassemble into the original payload', function () {
     $payload = str_repeat('Z', PacketFramer::MAX_PACKET_SIZE + 500);
     $packets = iterator_to_array(makeFramer()->frame($payload, makeFramerWriter(), $seqId));
 
-    $reassembled = implode('', array_map(fn($p) => substr($p, 4), $packets));
+    $reassembled = implode('', array_map(fn ($p) => substr($p, 4), $packets));
 
     expect($reassembled)->toBe($payload);
 });
@@ -145,10 +144,10 @@ test('frame last chunk contains the remaining payload bytes', function () {
 
 test('frame sequence IDs are contiguous across all chunks', function () {
     $seqId = 2;
-    $payload = str_repeat('D', PacketFramer::MAX_PACKET_SIZE * 2 + 1); 
+    $payload = str_repeat('D', PacketFramer::MAX_PACKET_SIZE * 2 + 1);
     $packets = iterator_to_array(makeFramer()->frame($payload, makeFramerWriter(), $seqId));
 
-    $ids = array_map(fn($p) => ord($p[3]), $packets);
+    $ids = array_map(fn ($p) => ord($p[3]), $packets);
 
     expect($ids)->toBe([2, 3, 4]);
 });

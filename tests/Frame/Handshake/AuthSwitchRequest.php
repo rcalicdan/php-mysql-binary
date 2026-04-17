@@ -9,5 +9,6 @@ test('exposes all properties correctly', function () {
 
     expect($frame->pluginName)->toBe('caching_sha2_password')
         ->and($frame->authData)->toBe('randomsalt')
-        ->and($frame->sequenceNumber)->toBe(3);
+        ->and($frame->sequenceNumber)->toBe(3)
+    ;
 });

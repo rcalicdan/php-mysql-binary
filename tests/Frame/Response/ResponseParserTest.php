@@ -148,5 +148,6 @@ test('ResponseParser parses OK packet with empty info string', function () {
     expect($packet)->toBeInstanceOf(OkPacket::class)
         ->and($packet->affectedRows)->toBe(0)
         ->and($packet->lastInsertId)->toBe(0)
-        ->and($packet->info)->toBe('');
+        ->and($packet->info)->toBe('')
+    ;
 });

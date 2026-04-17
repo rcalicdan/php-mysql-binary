@@ -16,6 +16,7 @@ interface PayloadReader
      * Reads a fixed-size integer from the payload.
      *
      * @param int $bytes Number of bytes to read
+     *
      * @return int|float The integer value
      */
     public function readFixedInteger(int $bytes): int|float;
@@ -31,6 +32,7 @@ interface PayloadReader
      * Reads a fixed-length string from the payload.
      *
      * @param int $length Number of bytes to read
+     *
      * @return string The string data
      */
     public function readFixedString(int $length): string;

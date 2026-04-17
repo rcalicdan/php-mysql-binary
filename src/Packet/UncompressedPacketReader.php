@@ -20,10 +20,14 @@ class UncompressedPacketReader implements PacketReader
 
     private string $partialHeader = '';
 
-    /** @var array<int, array{0: int, 1: int}> */
+    /**
+     * @var array<int, array{0: int, 1: int}>
+     */
     private array $packets = [];
 
-    /** @var array<int, int> */
+    /**
+     * @var array<int, int>
+     */
     private array $remainingPacketLength = [];
 
     private BinaryIntegerReader $binaryIntegerReader;

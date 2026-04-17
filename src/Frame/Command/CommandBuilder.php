@@ -16,6 +16,7 @@ use Rcalicdan\MySQLBinaryProtocol\Constants\Command;
 class CommandBuilder
 {
     private BufferPayloadWriterFactory $writerFactory;
+
     private ParameterBuilder $parameterBuilder;
 
     public function __construct(

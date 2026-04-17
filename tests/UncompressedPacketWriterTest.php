@@ -94,5 +94,6 @@ test('UncompressedPacketWriter exception message contains actual and max size', 
 
     expect(fn () => makeWriter()->write($payload, 0))
         ->toThrow(InvalidArgumentException::class, '16777216')
-        ->toThrow(InvalidArgumentException::class, '16777215');
+        ->toThrow(InvalidArgumentException::class, '16777215')
+    ;
 });

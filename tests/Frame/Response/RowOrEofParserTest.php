@@ -135,5 +135,6 @@ test('RowOrEofParser parses row with multiple columns', function () {
     $packet = $parser->parse($reader, strlen($payloadData), 1);
 
     expect($packet)->toBeInstanceOf(TextRow::class)
-        ->and($packet->values)->toBe(['A', 'B', 'C', 'D']);
+        ->and($packet->values)->toBe(['A', 'B', 'C', 'D'])
+    ;
 });
