@@ -147,67 +147,69 @@ test('parses pre-4.1 legacy handshake', function () {
 });
 
 test('strips trailing null byte from auth data to ensure exactly 20 bytes', function () {
-    $capabilities = CapabilityFlags::CLIENT_PROTOCOL_41 
-        | CapabilityFlags::CLIENT_SECURE_CONNECTION 
+    $capabilities = CapabilityFlags::CLIENT_PROTOCOL_41
+        | CapabilityFlags::CLIENT_SECURE_CONNECTION
         | CapabilityFlags::CLIENT_PLUGIN_AUTH;
 
     $payloadData = "\x0a";
     $payloadData .= "8.0.35-MariaDB\x00";
     $payloadData .= pack('V', 100);
-    $payloadData .= "12345678"; // Part 1 (8 bytes)
+    $payloadData .= '12345678'; // Part 1 (8 bytes)
     $payloadData .= "\x00";
     $payloadData .= pack('v', $capabilities & 0xFFFF);
     $payloadData .= pack('C', CharsetIdentifiers::UTF8MB4);
     $payloadData .= pack('v', StatusFlags::SERVER_STATUS_AUTOCOMMIT);
     $payloadData .= pack('v', ($capabilities >> 16) & 0xFFFF);
-    
-    $payloadData .= "\x15"; 
+
+    $payloadData .= "\x15";
     $payloadData .= str_repeat("\x00", 10);
-    
-    $payloadData .= "ABCDEFGHIJKL\x00"; 
-    
+
+    $payloadData .= "ABCDEFGHIJKL\x00";
+
     $payloadData .= "mysql_native_password\x00";
 
     $reader = createReader($payloadData);
     $parser = new HandshakeParser();
-    
+
     /** @var HandshakeV10 $handshake */
     $handshake = $parser->parse($reader, strlen($payloadData), 0);
 
     expect($handshake->authData)->toHaveLength(20)
         ->and($handshake->authData)->toBe('12345678ABCDEFGHIJKL')
-        ->and(str_ends_with($handshake->authData, "\x00"))->toBeFalse();
+        ->and(str_ends_with($handshake->authData, "\x00"))->toBeFalse()
+    ;
 });
 
 test('handles MariaDB style handshake where auth_plugin_data_len is zero', function () {
-    $capabilities = CapabilityFlags::CLIENT_PROTOCOL_41 
-        | CapabilityFlags::CLIENT_SECURE_CONNECTION 
+    $capabilities = CapabilityFlags::CLIENT_PROTOCOL_41
+        | CapabilityFlags::CLIENT_SECURE_CONNECTION
         | CapabilityFlags::CLIENT_PLUGIN_AUTH;
 
     $payloadData = "\x0a";
     $payloadData .= "11.8.6-MariaDB\x00";
     $payloadData .= pack('V', 123);
-    $payloadData .= "87654321";
+    $payloadData .= '87654321';
     $payloadData .= "\x00";
     $payloadData .= pack('v', $capabilities & 0xFFFF);
     $payloadData .= pack('C', CharsetIdentifiers::UTF8MB4);
     $payloadData .= pack('v', StatusFlags::SERVER_STATUS_AUTOCOMMIT);
     $payloadData .= pack('v', ($capabilities >> 16) & 0xFFFF);
-    
-    $payloadData .= "\x00"; 
+
+    $payloadData .= "\x00";
     $payloadData .= str_repeat("\x00", 10);
-    
-    $payloadData .= "MNOPQRSTUVWX\x00"; 
-    
+
+    $payloadData .= "MNOPQRSTUVWX\x00";
+
     $payloadData .= "mysql_native_password\x00";
 
     $reader = createReader($payloadData);
     $parser = new HandshakeParser();
-    
+
     /** @var HandshakeV10 $handshake */
     $handshake = $parser->parse($reader, strlen($payloadData), 0);
 
     expect($handshake->authData)->toHaveLength(20)
         ->and($handshake->authData)->toBe('87654321MNOPQRSTUVWX')
-        ->and(str_ends_with($handshake->authData, "\x00"))->toBeFalse();
+        ->and(str_ends_with($handshake->authData, "\x00"))->toBeFalse()
+    ;
 });

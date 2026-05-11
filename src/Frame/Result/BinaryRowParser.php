@@ -16,9 +16,11 @@ class BinaryRowParser implements FrameParser
 {
     /**
      * @param ColumnDefinition[] $columns The column definitions for this result set.
+     * @param bool $stringifyValues Whether to cast all parsed values to strings.
      */
     public function __construct(
-        private array $columns
+        private array $columns,
+        private bool $stringifyValues = false
     ) {
     }
 
@@ -70,7 +72,9 @@ class BinaryRowParser implements FrameParser
     private function parseColumnValue(PayloadReader $reader, ColumnDefinition $column): mixed
     {
         if ($column->type === MysqlType::LONGLONG) {
-            return $this->readLongLong($reader, $column);
+            $val = $this->readLongLong($reader, $column);
+
+            return $this->stringifyValues ? (string) $val : $val;
         }
 
         $val = match ($column->type) {
@@ -83,6 +87,10 @@ class BinaryRowParser implements FrameParser
             MysqlType::TIME => $this->parseTime($reader),
             default => $reader->readLengthEncodedStringOrNull(),
         };
+
+        if ($val === null) {
+            return null;
+        }
 
         // Handle sign conversion for standard integer types
         if (
@@ -98,7 +106,7 @@ class BinaryRowParser implements FrameParser
             };
         }
 
-        return $val;
+        return $this->stringifyValues ? (string) $val : $val;
     }
 
     /**

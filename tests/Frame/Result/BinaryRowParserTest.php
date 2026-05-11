@@ -147,3 +147,41 @@ test('parses JSON as string', function () {
     $row = $parser->parse(createBinaryRowReader($payload), 0, 1);
     expect($row->values[0])->toBe($json);
 });
+
+test('stringifies all parsed values when stringifyValues is true, keeping nulls as null', function () {
+    $columns = [
+        createColumnDef(MysqlType::LONGLONG),
+        createColumnDef(MysqlType::DOUBLE),
+        createColumnDef(MysqlType::TINY),
+    ];
+
+    // bit position for column 2 (TINY) is 2 + 2 = 4. 1 << 4 = 16 (0x10)
+    $nullBitmap = "\x10";
+
+    $values = pack('P', 123456789) . pack('e', 123.456);
+
+    $parser = new BinaryRowParser($columns, stringifyValues: true);
+    $row = $parser->parse(createBinaryRowReader($nullBitmap . $values), 0, 1);
+
+    expect($row->values)->toBe(['123456789', '123.456', null]);
+});
+
+test('stringifies FLOAT properly without precision loss when stringifyValues is true', function () {
+    $columns = [createColumnDef(MysqlType::FLOAT)];
+
+    $payload = "\x00" . pack('f', 99.5);
+    $parser = new BinaryRowParser($columns, stringifyValues: true);
+    $row = $parser->parse(createBinaryRowReader($payload), 0, 1);
+
+    expect($row->values[0])->toBe('99.5');
+});
+
+test('stringifies signed and unsigned tinyints when stringifyValues is true', function () {
+    $columns = [createColumnDef(MysqlType::TINY)];
+
+    $payload = "\x00" . pack('c', -12); // -12
+    $parser = new BinaryRowParser($columns, stringifyValues: true);
+    $row = $parser->parse(createBinaryRowReader($payload), 0, 1);
+
+    expect($row->values[0])->toBe('-12');
+});

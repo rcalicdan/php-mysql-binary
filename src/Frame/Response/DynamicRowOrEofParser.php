@@ -31,12 +31,15 @@ class DynamicRowOrEofParser implements FrameParser
 
     /**
      * @param ColumnDefinition[] $columns
+     * @param bool|null $forceTextFormat True if Text Protocol, False if Binary Protocol, Null if not yet detected.
+     * @param bool $stringifyValues Whether to cast all parsed binary row values to strings.
      */
     public function __construct(
         private array $columns,
-        ?bool $forceTextFormat = null
+        ?bool $forceTextFormat = null,
+        bool $stringifyValues = false
     ) {
-        $this->binaryParser = new BinaryRowParser($columns);
+        $this->binaryParser = new BinaryRowParser($columns, $stringifyValues);
         $this->isTextFormat = $forceTextFormat;
     }
 

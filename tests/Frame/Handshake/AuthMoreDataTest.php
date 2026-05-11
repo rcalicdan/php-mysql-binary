@@ -33,5 +33,6 @@ test('exposes data and sequenceNumber as public properties', function () {
     $frame = new AuthMoreData('somedata', 5);
 
     expect($frame->data)->toBe('somedata')
-        ->and($frame->sequenceNumber)->toBe(5);
+        ->and($frame->sequenceNumber)->toBe(5)
+    ;
 });

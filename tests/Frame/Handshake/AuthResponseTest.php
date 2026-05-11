@@ -97,5 +97,6 @@ test('throws RuntimeException on unexpected packet type', function () {
     $reader = createReader($payload);
 
     expect(fn () => (new AuthResponseParser())->parse($reader, strlen($payload), 1))
-        ->toThrow(RuntimeException::class, 'Unexpected packet type during authentication phase: 0x42');
+        ->toThrow(RuntimeException::class, 'Unexpected packet type during authentication phase: 0x42')
+    ;
 });

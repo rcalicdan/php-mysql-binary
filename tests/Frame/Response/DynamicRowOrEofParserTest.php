@@ -166,5 +166,22 @@ test('DynamicRowOrEofParser parses ERR packet', function () {
         ->and($result->errorCode)->toBe(1146)
         ->and($result->sqlStateMarker)->toBe('#')
         ->and($result->sqlState)->toBe('42S02')
-        ->and($result->errorMessage)->toBe($errorMsg);
+        ->and($result->errorMessage)->toBe($errorMsg)
+    ;
+});
+
+test('DynamicRowOrEofParser stringifies binary row values when stringifyValues is true', function () {
+    $columns = [makeCol(MysqlType::LONG), makeCol(MysqlType::DOUBLE)];
+
+    // Payload: OK byte (0x00) + Null Bitmap + LONG (42) + DOUBLE (3.14)
+    $payload = "\x00" . buildNullBitmap(2) . pack('V', 42) . pack('e', 3.14);
+
+    $row = (new DynamicRowOrEofParser($columns, forceTextFormat: false, stringifyValues: true))
+        ->parse(createReader($payload), strlen($payload), 1)
+    ;
+
+    expect($row)->toBeInstanceOf(BinaryRow::class)
+        ->and($row->values[0])->toBe('42')
+        ->and($row->values[1])->toBe('3.14')
+    ;
 });
